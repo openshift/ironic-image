@@ -1,3 +1,7 @@
+FROM registry.access.redhat.com/ubi8/python-36:latest AS builder
+
+RUN pip3 install ironic
+
 FROM ubi8
 
 RUN yum update -y && \
@@ -7,9 +11,10 @@ RUN yum update -y && \
     yum clean all && \
     rm -rf /var/cache/{yum,dnf}/*
 
-copy ./prepare-ipxe.sh /tmp
+COPY ./prepare-ipxe.sh /tmp
 RUN chmod +x /tmp/prepare-ipxe.sh && /tmp/prepare-ipxe.sh && rm /tmp/prepare-ipxe.sh
 
+COPY --from=builder /tmp/esp.img /httpboot/uefi_esp.img
 
 COPY ./ironic.conf /tmp/ironic.conf
 RUN crudini --merge /etc/ironic/ironic.conf < /tmp/ironic.conf && \
