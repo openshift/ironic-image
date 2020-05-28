@@ -38,7 +38,7 @@ COPY ./ironic.conf /tmp/ironic.conf
 RUN crudini --merge /etc/ironic/ironic.conf < /tmp/ironic.conf && \
     rm /tmp/ironic.conf
 
-RUN cd /usr/lib/python3.6/site-packages && curl "https://review.opendev.org/changes/731575/revisions/0fa282eee7697427d70eef5255c2113397c7d816/patch?download" | base64 -d | patch -p1
+RUN cd /usr/lib/python3.6/site-packages && curl "https://review.opendev.org/changes/731575/revisions/0fa282eee7697427d70eef5255c2113397c7d816/patch?download" | base64 -d | patch -f -p1
 
 COPY ./runironic-api.sh /bin/runironic-api
 COPY ./runironic-conductor.sh /bin/runironic-conductor
