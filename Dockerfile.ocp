@@ -21,14 +21,35 @@ RUN if [ $(uname -m) = "x86_64" ]; then \
 
 FROM ubi8
 
-RUN dnf update -y && \
-    dnf --setopt=install_weak_deps=False install -y python3-gunicorn \
-        openstack-ironic-api openstack-ironic-conductor crudini \
-        iproute dnsmasq httpd qemu-img iscsi-initiator-utils parted \
-        gdisk ipxe-bootimgs ipxe-roms-qemu psmisc mariadb-server \
-        genisoimage python3-ironic-prometheus-exporter \
-        python3-jinja2 python3-sushy-oem-idrac ipmitool python3-dracclient \
-        python3-scciclient python3-sushy && \
+ENV IRONIC_VER 15.1.1-0.20200709111907.5d419bc.el8ost
+
+RUN dnf upgrade -y && \
+    dnf --setopt=install_weak_deps=False install -y \
+        crudini \
+        dnsmasq \
+        gdisk \
+        genisoimage \
+        httpd \
+        ipmitool \
+        iproute \
+        ipxe-bootimgs \
+        ipxe-roms-qemu \
+        iscsi-initiator-utils \
+        mariadb-server \
+        openstack-ironic-api-$IRONIC_VER \
+        openstack-ironic-common-$IRONIC_VER \
+        openstack-ironic-conductor-$IRONIC_VER \
+        parted \
+        psmisc \
+        python3-dracclient \
+        python3-gunicorn \
+        python3-ironic-prometheus-exporter \
+        python3-jinja2 \
+        python3-scciclient \
+        python3-sushy \
+        python3-sushy-oem-idrac \
+        qemu-img \
+        && \
     dnf clean all && \
     rm -rf /var/cache/{yum,dnf}/*
 
