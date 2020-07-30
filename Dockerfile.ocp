@@ -21,8 +21,9 @@ RUN if [ $(uname -m) = "x86_64" ]; then \
 
 FROM ubi8
 
-RUN dnf update -y && \
-    dnf --setopt=install_weak_deps=False install -y python3-gunicorn \
+RUN dnf upgrade -y && \
+    dnf --setopt=install_weak_deps=False install -y \
+        python3-gunicorn \
         openstack-ironic-api openstack-ironic-conductor crudini \
         iproute dnsmasq httpd qemu-img iscsi-initiator-utils parted \
         gdisk ipxe-bootimgs ipxe-roms-qemu psmisc mariadb-server \
