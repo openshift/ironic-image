@@ -1,4 +1,5 @@
-FROM ironic-builder AS builder
+ARG BaseImage=ironic-builder
+FROM $BaseImage AS builder
 
 WORKDIR /tmp
 
@@ -19,7 +20,7 @@ RUN if [ $(uname -m) = "x86_64" ]; then \
       touch /tmp/esp.img; \
     fi
 
-FROM ubi8
+FROM $BaseImage
 
 RUN dnf update -y && \
     dnf --setopt=install_weak_deps=False install -y python3-gunicorn \
