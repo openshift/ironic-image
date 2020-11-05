@@ -19,6 +19,8 @@ RUN if [ $(uname -m) = "x86_64" ]; then \
       touch /tmp/esp.img; \
     fi
 
+# TEST
+
 FROM registry.svc.ci.openshift.org/ocp/builder:rhel-8-base-openshift
 
 ARG PKGS_LIST=main-packages-list.txt
