@@ -1,3 +1,4 @@
+# efi boot builder image
 FROM registry.svc.ci.openshift.org/ocp/builder:rhel-8-base-openshift AS builder
 
 WORKDIR /tmp
@@ -19,14 +20,27 @@ RUN if [ $(uname -m) = "x86_64" ]; then \
       touch /tmp/esp.img; \
     fi
 
+
+# rpms builder image
+FROM registry.svc.ci.openshift.org/ocp/builder:rhel-8-base-openshift AS rpm-builder
+
+COPY build-rpms.sh /bin/
+COPY sources/ /sources/
+COPY specs/ /specs/
+RUN build-rpms.sh
+
+
+# final image
 FROM registry.svc.ci.openshift.org/ocp/builder:rhel-8-base-openshift
 
 ARG PKGS_LIST=main-packages-list.txt
 
 COPY ${PKGS_LIST} /tmp/main-packages-list.txt
 
+COPY --from=rpm-builder /var/tmp/RPMS/noarch/*.rpm /var/tmp/ironic-rpms/
+
 RUN dnf upgrade -y && \
-    dnf --setopt=install_weak_deps=False install -y $(cat /tmp/main-packages-list.txt) && \
+    dnf --setopt=install_weak_deps=False install -y $(cat /tmp/main-packages-list.txt) /var/tmp/ironic-rpms/*.rpm && \
     if [ $(uname -m) = "x86_64" ]; then \
       dnf install -y syslinux-nonlinux; \
     fi && \

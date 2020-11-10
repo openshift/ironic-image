@@ -10,8 +10,6 @@ ipxe-bootimgs
 ipxe-roms-qemu
 iscsi-initiator-utils
 mariadb-server
-openstack-ironic-api
-openstack-ironic-conductor
 parted
 psmisc
 python3-dracclient
