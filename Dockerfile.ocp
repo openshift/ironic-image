@@ -25,9 +25,11 @@ ARG PKGS_LIST=main-packages-list.txt
 
 COPY ${PKGS_LIST} /tmp/main-packages-list.txt
 
-RUN dnf upgrade -y && \
-    dnf --setopt=install_weak_deps=False install -y $(cat /tmp/main-packages-list.txt) && \
-    dnf clean all && \
+RUN cat /tmp/main-packages-list.txt
+
+RUN dnf upgrade -y 
+RUN dnf -v --setopt=install_weak_deps=False install -y $(cat /tmp/main-packages-list.txt) 
+RUN dnf clean all && \
     rm -rf /var/cache/{yum,dnf}/*
 
 COPY ./prepare-ipxe.sh /tmp
