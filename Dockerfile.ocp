@@ -16,7 +16,7 @@ RUN if [ $(uname -m) = "x86_64" ]; then \
       touch /tmp/esp.img; \
     fi
 
-FROM registry.ci.openshift.org/ocp/builder:rhel-8-base-openshift-4.8
+FROM ironic-base-4.8
 
 ENV PKGS_LIST=main-packages-list.txt
 ARG EXTRA_PKGS_LIST
