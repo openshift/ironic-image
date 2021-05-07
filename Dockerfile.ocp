@@ -21,13 +21,16 @@ FROM registry.ci.openshift.org/ocp/builder:rhel-8-base-openshift-4.8
 ENV PKGS_LIST=main-packages-list.txt
 ARG EXTRA_PKGS_LIST
 
-COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} /tmp/
+COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} ironic-fix.patch /tmp/
 COPY prepare-image.sh prepare-ipxe.sh /bin/
 
 RUN prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
     /bin/prepare-ipxe.sh && \
     rm -f /tmp/prepare-ipxe.sh
+
+RUN cd /usr/lib/python3.6/site-packages/ && \
+    patch -p1 < /tmp/ironic-fix.patch
 
 COPY --from=builder /tmp/esp.img /tmp/uefi_esp.img
 

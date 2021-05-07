@@ -13,6 +13,7 @@ mariadb-server
 openstack-ironic-api >= 1:17.0.1-0.20210407191221.d6bb66d.el8
 openstack-ironic-conductor >= 1:17.0.1-0.20210407191221.d6bb66d.el8
 parted
+patch
 psmisc
 python3-debtcollector >= 2.2.0-0.20201008171245.649189d.el8
 python3-dracclient
