@@ -19,7 +19,7 @@ parted
 psmisc
 python3-debtcollector >= 2.2.0-0.20210324220630.649189d.el8
 python3-dracclient >= 5.1.1-0.20210318155434.98c7ea3.el8
-python3-eventlet >= 0.30.2-1.el8
+python3-eventlet
 python3-gunicorn
 python3-ironic-lib >= 4.7.2-0.20210707162243.d33cf3e.el8
 python3-ironic-prometheus-exporter >= 2.3.0-0.20210611093526.3c9b517.el8
