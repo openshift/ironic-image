@@ -113,6 +113,8 @@ if [ -n "${HTTP_BASIC_HTPASSWD}" ]; then
     fi
 fi
 
+echo "THIS IS A TEST! DO NOT MERGE!"
+
 . /bin/coreos-ipa-common.sh
 
 # The original ironic.conf is empty, and can be found in ironic.conf_orig
