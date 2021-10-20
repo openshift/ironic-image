@@ -4,6 +4,7 @@ FROM registry.ci.openshift.org/ocp/builder:rhel-8-base-openshift-4.10 AS builder
 WORKDIR /tmp
 
 RUN if [ $(uname -m) = "x86_64" ]; then \
+      dnf config-manager --set-disabled openstack-16-for-rhel-8-rpms && \
       dnf install -y genisoimage grub2 grub2-efi-x64 shim dosfstools mtools && \
       dd bs=1024 count=6400 if=/dev/zero of=esp.img && \
       mkfs.msdos -F 12 -n 'ESP_IMAGE' ./esp.img && \
@@ -24,7 +25,8 @@ ARG EXTRA_PKGS_LIST
 COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} /tmp/
 COPY prepare-image.sh prepare-ipxe.sh /bin/
 
-RUN prepare-image.sh && \
+RUN dnf config-manager --set-disabled openstack-16-for-rhel-8-rpms && \
+    prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
     /bin/prepare-ipxe.sh && \
     rm -f /tmp/prepare-ipxe.sh
