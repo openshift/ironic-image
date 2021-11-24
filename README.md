@@ -38,3 +38,4 @@ The ironic configuration can be overridden by various environment variables. The
 - OS_CONDUCTOR__INSPECT_TIMEOUT=1800 - timeout (seconds) for waiting for node inspection
 - OS_CONDUCTOR__CLEAN_CALLBACK_TIMEOUT=1800 - timeout (seconds) to wait for a callback from the ramdisk doing the cleaning
 - OS_PXE__BOOT_RETRY_TIMEOUT=1200 - timeout (seconds) to enable boot retries.
+
