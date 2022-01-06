@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euxo pipefail
+
 ARCH=$(uname -m)
 DEST=${2:-/tmp/esp.img}
 OS=${1:-centos}
@@ -16,6 +18,10 @@ else
     echo "WARNING: don't know how to build an EFI image on $ARCH"
     touch "$DEST"
     exit 0
+fi
+
+if dnf repolist enabled | grep -q openstack-16-for-rhel-8-rpms ; then
+  dnf config-manager --set-disabled openstack-16-for-rhel-8-rpms
 fi
 
 dnf install -y grub2 shim dosfstools mtools $PACKAGES
