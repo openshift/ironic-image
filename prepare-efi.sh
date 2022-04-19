@@ -20,7 +20,7 @@ else
     exit 0
 fi
 
-dnf install -y grub2 shim dosfstools mtools $PACKAGES
+dnf install -y grub2 shim dosfstools mtools glibc-gconv-extra $PACKAGES
 
 ## TODO(TheJulia): At some point we may want to try and make the size
 ## of the ESP image file to be sized smaller for the files that need to
