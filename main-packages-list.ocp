@@ -17,6 +17,7 @@ openstack-ironic-api >= 1:19.0.1-0.20221012164020.455c1a9.el8
 openstack-ironic-conductor >= 1:19.0.1-0.20221012164020.455c1a9.el8
 openstack-ironic-inspector >= 10.9.1-0.20220117094044.19e2592.el8
 parted
+patch
 psmisc
 python3-debtcollector >= 2.3.0-0.20211012161119.0bf5bf5.el8
 python3-dracclient >= 7.0.0-0.20211012182751.d26664e.el8

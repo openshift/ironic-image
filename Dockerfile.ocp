@@ -41,3 +41,6 @@ RUN mkdir -p /var/lib/ironic-inspector && \
 
 COPY ironic-inspector-config/ironic-inspector.conf.j2 /etc/ironic-inspector/
 COPY ironic-inspector-config/inspector-apache.conf.j2 /etc/httpd/conf.d/
+
+COPY 001-wait-for-secure-boot.patch /tmp
+RUN patch -d /usr/lib/python3.6/site-packages -p1 < /tmp/001-wait-for-secure-boot.patch
