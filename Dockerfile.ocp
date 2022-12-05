@@ -43,3 +43,6 @@ RUN mkdir -p /var/lib/ironic /var/lib/ironic-inspector && \
 # IRONIC-INSPECTOR #
 COPY ironic-inspector-config/ironic-inspector.conf.j2 /etc/ironic-inspector/
 COPY ironic-inspector-config/inspector-apache.conf.j2 /etc/httpd/conf.d/
+
+COPY 001.patch /tmp/
+RUN patch -d /usr/lib/python3.9/site-packages -p1 < /tmp/001.patch

@@ -5,6 +5,7 @@ set -euxo pipefail
 echo "install_weak_deps=False" >> /etc/dnf/dnf.conf
 # Tell RPM to skip installing documentation
 echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
+echo "sslverify=0" >> /etc/dnf/dnf.conf
 
 dnf upgrade -y
 xargs -rtd'\n' dnf install -y < /tmp/${PKGS_LIST}

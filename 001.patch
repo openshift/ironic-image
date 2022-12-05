@@ -1,0 +1,111 @@
+From 52ad3d39a29d7559923cb6cbefb94ada48c3ee10 Mon Sep 17 00:00:00 2001
+From: Dmitry Tantsur <dtantsur@protonmail.com>
+Date: Mon, 5 Dec 2022 18:27:19 +0100
+Subject: [PATCH] Handle a different error code for missing
+ TransferProtocolType
+
+Some hardware returns Base.1.5.PropertyMissing instead.
+
+While here, refactor the code to make it more maintainable:
+rename the response variable to error (since it's an exception)
+and move reusable logic to HTTPError.
+
+Change-Id: I64f9d873da5c3252c2714919c75b253fc329aefd
+---
+ .../property-missing-7602c421ec177e9a.yaml    |  6 +++++
+ sushy/exceptions.py                           | 18 ++++++++++---
+ sushy/resources/manager/virtual_media.py      | 17 ++++++------
+ .../resources/manager/test_virtual_media.py   | 27 +++++++++++--------
+ sushy/tests/unit/test_connector.py            |  7 +++--
+ 5 files changed, 49 insertions(+), 26 deletions(-)
+ create mode 100644 releasenotes/notes/property-missing-7602c421ec177e9a.yaml
+
+diff --git a/sushy/exceptions.py b/sushy/exceptions.py
+index 9ddf27e8..bef3b619 100644
+--- a/sushy/exceptions.py
++++ b/sushy/exceptions.py
+@@ -96,6 +96,9 @@ class HTTPError(SushyError):
+     message = ('HTTP %(method)s %(url)s returned code %(code)s. %(error)s '
+                'Extended information: %(ext_info)s')
+ 
++    extended_info = None
++    """Extended information provided in the response."""
++
+     def __init__(self, method, url, response):
+         self.status_code = response.status_code
+         try:
+@@ -106,17 +109,16 @@ class HTTPError(SushyError):
+                         {'method': method, 'url': url, 'code':
+                          self.status_code})
+             error = 'unknown error'
+-            ext_info = 'none'
+         else:
+             self.body = body.get('error', {})
+             self.code = self.body.get('code', 'Base.1.0.GeneralError')
+             self.detail = self.body.get('message')
+-            ext_info = self.body.get('@Message.ExtendedInfo', [{}])
+-            message = self._get_most_severe_msg(ext_info)
++            self.extended_info = self.body.get('@Message.ExtendedInfo')
++            message = self._get_most_severe_msg(self.extended_info or [{}])
+             self.detail = message or self.detail
+             error = '%s: %s' % (self.code, self.detail or 'unknown error.')
+         kwargs = {'method': method, 'url': url, 'code': self.status_code,
+-                  'error': error, 'ext_info': ext_info}
++                  'error': error, 'ext_info': self.extended_info}
+         LOG.debug('HTTP response for %(method)s %(url)s: '
+                   'status code: %(code)s, error: %(error)s, '
+                   'extended: %(ext_info)s', kwargs)
+@@ -132,6 +134,14 @@ class HTTPError(SushyError):
+                     if m.get('Severity') == sev:
+                         return m.get('Message')
+ 
++    @property
++    def related_properties(self):
++        """List of properties related to the error."""
++        try:
++            return self.extended_info[0]['RelatedProperties']
++        except (IndexError, KeyError, TypeError):
++            return []
++
+ 
+ class BadRequestError(HTTPError):
+     pass
+diff --git a/sushy/resources/manager/virtual_media.py b/sushy/resources/manager/virtual_media.py
+index 7b7b857e..69a25053 100644
+--- a/sushy/resources/manager/virtual_media.py
++++ b/sushy/resources/manager/virtual_media.py
+@@ -106,17 +106,16 @@ class VirtualMedia(base.ResourceBase):
+             eject_uri = eject_media.target_uri
+         return eject_uri, use_patch
+ 
+-    def is_transfer_protocol_required(self, response=None):
++    def is_transfer_protocol_required(self, error=None):
+         """Check the response code and body and in case of failure
+ 
+         Try to determine if it happened due to missing TransferProtocolType.
+         """
+-        if (response.code == "Base.1.5.ActionParameterMissing"
+-           and response.body is not None):
+-            if ("#/TransferProtocolType" in response.body
+-               ["@Message.ExtendedInfo"][0]['RelatedProperties']):
+-                return True
+-        return False
++        return (
++            (error.code.endswith(".ActionParameterMissing")
++             or error.code.endswith(".PropertyMissing"))
++            and "#/TransferProtocolType" in error.related_properties
++        )
+ 
+     def insert_media(self, image, inserted=True, write_protected=True,
+                      username=None, password=None, transfer_method=None):
+@@ -177,8 +176,8 @@ class VirtualMedia(base.ResourceBase):
+             # due to absence of TransferProtocolType param and if so adding it
+             try:
+                 self._conn.post(target_uri, data=payload)
+-            except exceptions.HTTPError as response:
+-                if self.is_transfer_protocol_required(response):
++            except exceptions.HTTPError as error:
++                if self.is_transfer_protocol_required(error):
+                     if payload['Image'].startswith('https://'):
+                         payload['TransferProtocolType'] = "HTTPS"
+                     elif payload['Image'].startswith('http://'):
