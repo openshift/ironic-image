@@ -6,7 +6,10 @@ echo "install_weak_deps=False" >> /etc/dnf/dnf.conf
 # Tell RPM to skip installing documentation
 echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
 
-dnf upgrade -y
+# SOURCE install #
+
+BUILD_DEPS="python3-devel gcc gcc-c++ git-core krb5-devel libxml2-devel libxslt-devel libffi-devel cargo rust"
+
 xargs -rtd'\n' dnf install -y < /tmp/${PKGS_LIST}
 if [ $(uname -m) = "x86_64" ]; then
     dnf install -y syslinux-nonlinux;
@@ -17,6 +20,45 @@ if [[ -n "${EXTRA_PKGS_LIST:-}" ]]; then
         xargs -rtd'\n' dnf install -y < /tmp/"${EXTRA_PKGS_LIST}"
     fi
 fi
+
+echo $REMOTE_SOURCES_DIR
+ls -la $REMOTE_SOURCES_DIR
+ls -la $REMOTE_SOURCES_DIR/cachito-gomod-with-deps
+ls -la $REMOTE_SOURCES_DIR/cachito-gomod-with-deps/app
+cat $REMOTE_SOURCES_DIR/cachito-gomod-with-deps/app/requirements.txt
+ls -la $REMOTE_SOURCES_DIR/cachito-gomod-with-deps/deps
+cat $REMOTE_SOURCES_DIR/cachito-gomod-with-deps/cachito.env
+
+source "$REMOTE_SOURCES_DIR/cachito-gomod-with-deps/cachito.env"
+
+REQS="$REMOTE_SOURCES_DIR/cachito-gomod-with-deps/app/requirements.txt"
+
+export CARGO_NET_OFFLINE=true
+
+# NOTE(dtantsur): pip is a requirement of python3 in CentOS
+# shellcheck disable=SC2086
+dnf install -y python3-pip python3-setuptools $BUILD_DEPS
+
+python3 -m pip install -r /tmp/${BUILD_REQS}
+
+python3 -m pip install /vendor/*$(uname -m).whl
+
+python3 -m pip install --prefix /usr -r ${REQS}
+
+# ironic and ironic-inspector system configuration
+mkdir -p /var/log/ironic /var/log/ironic-inspector /var/lib/ironic /var/lib/ironic-inspector
+getent group ironic >/dev/null || groupadd -r ironic
+getent passwd ironic >/dev/null || useradd -r -g ironic -s /sbin/nologin ironic -d /var/lib/ironic
+getent group ironic-inspector >/dev/null || groupadd -r ironic-inspector
+getent passwd ironic-inspector >/dev/null || useradd -r -g ironic-inspector -s /sbin/nologin ironic-inspector -d /var/lib/ironic-inspector
+
+# clean installed build dependencies
+# shellcheck disable=SC2086
+dnf remove -y $BUILD_DEPS
+
+# NOTE(rpittau): jinja2 is misteriuosly removed as dependent package
+# reinstall it here as a workaround
+dnf install -y python3-jinja2
 
 chown ironic:ironic /var/log/ironic
 # This file is generated after installing mod_ssl and it affects our configuration

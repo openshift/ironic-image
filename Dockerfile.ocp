@@ -9,12 +9,25 @@ RUN prepare-efi.sh redhat
 FROM registry.ci.openshift.org/ocp/builder:rhel-9-base-openshift-4.15
 
 ENV PKGS_LIST=main-packages-list.ocp
+ENV BUILD_REQS=requirements-build.txt
 ARG EXTRA_PKGS_LIST
+ARG REMOTE_SOURCES
+ARG REMOTE_SOURCES_DIR
 
-COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} /tmp/
+COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} ${BUILD_REQS} /tmp/
 COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh /bin/
+COPY vendor /vendor/
 
-RUN prepare-image.sh && \
+COPY $REMOTE_SOURCES $REMOTE_SOURCES_DIR
+
+RUN ls -la $REMOTE_SOURCES_DIR && \
+    ls -la $REMOTE_SOURCES_DIR/cachito-gomod-with-deps && \
+    ls -la $REMOTE_SOURCES_DIR/cachito-gomod-with-deps/app && \
+    cat $REMOTE_SOURCES_DIR/cachito-gomod-with-deps/app/requirements.txt && \
+    ls -la $REMOTE_SOURCES_DIR/cachito-gomod-with-deps/deps && \
+    cat $REMOTE_SOURCES_DIR/cachito-gomod-with-deps/cachito.env && \
+    source $REMOTE_SOURCES_DIR/cachito-gomod-with-deps/cachito.env && \
+    prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
     /bin/prepare-ipxe.sh && \
     rm -f /tmp/prepare-ipxe.sh
