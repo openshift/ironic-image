@@ -38,6 +38,9 @@ export IRONIC_AUTOMATED_CLEAN=${IRONIC_AUTOMATED_CLEAN:-true}
 # Wheter to enable the sensor data collection
 export SEND_SENSOR_DATA=${SEND_SENSOR_DATA:-false}
 
+# ipmi timout passed to ipmitool
+export IRONIC_IPMI_TIMEOUT=${IRONIC_IPMI_TIMEOUT:-6}
+
 wait_for_interface_or_ip
 
 export IRONIC_BASE_URL="${IRONIC_SCHEME}://${IRONIC_URL_HOST}:${IRONIC_ACCESS_PORT}"
