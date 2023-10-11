@@ -47,3 +47,6 @@ COPY ironic-inspector-config/inspector-apache.conf.j2 /etc/httpd/conf.d/
 # configure non-root user and set relevant permissions
 RUN configure-nonroot.sh && \
   rm -f /bin/configure-nonroot.sh
+
+### THIS IS A TEST
+
