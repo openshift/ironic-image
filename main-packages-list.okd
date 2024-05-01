@@ -20,6 +20,7 @@ python3-automaton
 python3-cinderclient
 python3-cliff
 python3-debtcollector
+python3-dracclient
 python3-eventlet
 python3-flask
 python3-futurist
@@ -29,6 +30,7 @@ python3-ironicclient
 python3-jinja2
 python3-keystoneauth1
 python3-markupsafe
+python3-mod_wsgi
 python3-msgpack
 python3-openstacksdk
 python3-oslo-cache
