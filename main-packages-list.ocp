@@ -23,6 +23,7 @@ python3-flask >= 2:2.0.1-4.el9.2
 python3-futurist >= 2.4.1-0.20230308173923.159d752.el9
 python3-glanceclient >= 4.3.0-0.20230608143056.52fb6b2.el9
 python3-ironicclient >= 4.9.0-0.20211209154934.6f1be06.el9
+python3-ironic-lib >= 5.5.1-0.20240502100528.9d9adb5.el9
 python3-jinja2 >= 2-3.0.1-2.el9.1
 python3-jsonpath-rw
 python3-keystoneauth1 >= 5.2.0-0.20230608152518.2e40bbf.el9
