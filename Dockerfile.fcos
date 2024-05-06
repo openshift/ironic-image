@@ -4,7 +4,7 @@ FROM fedora:37 AS builder
 WORKDIR /tmp
 
 COPY prepare-efi.sh /bin/
-RUN prepare-efi.sh fedora
+RUN prepare-efi.sh
 
 FROM quay.io/centos/centos:stream9
 

@@ -4,7 +4,7 @@ FROM registry.ci.openshift.org/ocp/builder:rhel-9-base-openshift-4.16 AS builder
 WORKDIR /tmp
 
 COPY prepare-efi.sh /bin/
-RUN prepare-efi.sh redhat
+RUN prepare-efi.sh
 
 FROM registry.ci.openshift.org/ocp/builder:rhel-9-base-openshift-4.16
 
