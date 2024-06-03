@@ -76,4 +76,4 @@ usermod -aG ironic apache
 usermod -aG ironic-inspector apache
 
 dnf clean all
-rm -rf /var/cache/{yum,dnf}/*
+rm -rf /var/cache/{yum,dnf}/* # test change
