@@ -46,8 +46,8 @@ if  [[ -f /tmp/main-packages-list.ocp ]]; then
     if [[ ! -d "${REMOTE_SOURCES_DIR}/cachito-gomod-with-deps" ]]; then
         PIP_OPTIONS="--no-index"
     fi
-    python3 -m pip install $PIP_OPTIONS --prefix /usr -r "${REQS}"
-
+    python3 -m pip install --no-compile $PIP_OPTIONS --prefix /usr -r "${REQS}"
+    python3 -m compileall --invalidation-mode=timestamp /usr
     # ironic and ironic-inspector system configuration
     mkdir -p /var/log/ironic /var/log/ironic-inspector /var/lib/ironic /var/lib/ironic-inspector
     getent group ironic >/dev/null || groupadd -r -g "${IRONIC_GID}" ironic

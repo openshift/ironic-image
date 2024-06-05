@@ -15,7 +15,6 @@ ARG EXTRA_PKGS_LIST
 
 COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} /tmp/
 COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh /bin/
-
 # some cachito magic
 COPY "$REMOTE_SOURCES" "$REMOTE_SOURCES_DIR"
 
@@ -54,3 +53,8 @@ COPY ironic-inspector-config/inspector-apache.conf.j2 /etc/httpd/conf.d/
 # configure non-root user and set relevant permissions
 RUN configure-nonroot.sh && \
   rm -f /bin/configure-nonroot.sh
+# NOTE(janders) forcing newer python to test fix for RHEL-29028 and OCPBUGS-33736
+COPY python3-3.9.16-1.el9_2.4.x86_64.rpm /root/
+COPY python3-libs-3.9.16-1.el9_2.4.x86_64.rpm /root/
+RUN rpm -Uhv --nodeps --force /root/*.rpm && dnf clean all && rm -rf /var/cache/*
+# NOTE(janders) end COPY hack
