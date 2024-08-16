@@ -19,6 +19,8 @@ COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh /bin/
 # some cachito magic
 COPY "$REMOTE_SOURCES" "$REMOTE_SOURCES_DIR"
 
+# THIS IS A TEST
+
 RUN prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
     /bin/prepare-ipxe.sh && \
