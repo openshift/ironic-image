@@ -6,6 +6,19 @@ echo "install_weak_deps=False" >> /etc/dnf/dnf.conf
 # Tell RPM to skip installing documentation
 echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
 
+IRONIC_UID=1002
+IRONIC_GID=1003
+INSPECTOR_GID=1004
+
+# ironic and ironic-inspector system configuration
+mkdir -p /var/log/ironic /var/log/ironic-inspector /var/lib/ironic /var/lib/ironic-inspector
+getent group ironic >/dev/null || groupadd -r -g "${IRONIC_GID}" ironic
+getent passwd ironic >/dev/null || useradd -r -g ironic -s /sbin/nologin -u "${IRONIC_UID}" ironic -d /var/lib/ironic
+getent group ironic-inspector >/dev/null || groupadd -r -g "${INSPECTOR_GID}" ironic-inspector
+getent passwd ironic-inspector >/dev/null || useradd -r -g ironic-inspector -s /sbin/nologin ironic-inspector -d /var/lib/ironic-inspector
+
+chown ironic:ironic /var/log/ironic
+
 dnf upgrade -y
 xargs -rtd'\n' dnf install -y < /tmp/${PKGS_LIST}
 if [ $(uname -m) = "x86_64" ]; then
@@ -22,9 +35,6 @@ fi
 if  [[ -f /tmp/main-packages-list.ocp ]]; then
 
     REQS="${REMOTE_SOURCES_DIR}/requirements.cachito"
-    IRONIC_UID=1002
-    IRONIC_GID=1003
-    INSPECTOR_GID=1004
 
     ls -la "${REMOTE_SOURCES_DIR}/" # DEBUG
 
@@ -54,13 +64,6 @@ if  [[ -f /tmp/main-packages-list.ocp ]]; then
     # compile post-install (see RHEL-29028)
     python3 -m compileall --invalidation-mode=timestamp /usr
 
-    # ironic and ironic-inspector system configuration
-    mkdir -p /var/log/ironic /var/log/ironic-inspector /var/lib/ironic /var/lib/ironic-inspector
-    getent group ironic >/dev/null || groupadd -r -g "${IRONIC_GID}" ironic
-    getent passwd ironic >/dev/null || useradd -r -g ironic -s /sbin/nologin -u "${IRONIC_UID}" ironic -d /var/lib/ironic
-    getent group ironic-inspector >/dev/null || groupadd -r -g "${INSPECTOR_GID}" ironic-inspector
-    getent passwd ironic-inspector >/dev/null || useradd -r -g ironic-inspector -s /sbin/nologin ironic-inspector -d /var/lib/ironic-inspector
-
     dnf remove -y $BUILD_DEPS
 
     if [[ -d "${REMOTE_SOURCES_DIR}/cachito-gomod-with-deps" ]]; then
@@ -70,7 +73,6 @@ if  [[ -f /tmp/main-packages-list.ocp ]]; then
 fi
 ###
 
-chown ironic:ironic /var/log/ironic
 # This file is generated after installing mod_ssl and it affects our configuration
 rm -f /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/autoindex.conf /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.modules.d/*.conf
 
