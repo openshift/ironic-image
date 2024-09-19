@@ -1,4 +1,4 @@
-ironic @ git+https://github.com/openshift/openstack-ironic@b5660c91c737ea9859a23d0b53dbdaca74ddd59e
+ironic @ git+https://github.com/openshift/openstack-ironic@1aa3dd8a43019ab158d5115ffc622172ccd7efd2
 ironic-inspector @ git+https://github.com/openshift/openstack-ironic-inspector@de56b734e9f52294e622863814141b7b20201cad
 ironic-lib @ git+https://github.com/openshift/openstack-ironic-lib@97a8ae5891ca79af29fcce3e64a433a8a20f6afb
 sushy @ git+https://github.com/openshift/openstack-sushy@123a5a5948c000d2bd52f40aff70e04c2f23dc26
