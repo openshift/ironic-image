@@ -36,7 +36,7 @@ if  [[ -f /tmp/main-packages-list.ocp ]]; then
     ### source install ###
     BUILD_DEPS="python3-devel gcc gcc-c++"
 
-    dnf install -y python3-pip python3-setuptools $BUILD_DEPS
+    dnf install -y python3-pip $BUILD_DEPS
 
     # NOTE(elfosardo): --no-index is used to install the packages emulating
     # an isolated environment in CI. Do not use the option for downstream
