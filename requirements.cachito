@@ -3,3 +3,7 @@ ironic-lib @ git+https://github.com/openshift/openstack-ironic-lib@99f8a60b433ba
 sushy @ git+https://github.com/openshift/openstack-sushy@4535ab7efa012710d6eab0af07d4603df3d7464e
 
 # DEPENDENCIES
+
+pbr===6.0.0
+setuptools===64.0.0
+wheel===0.44.0
