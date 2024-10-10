@@ -34,12 +34,12 @@ if  [[ -f /tmp/main-packages-list.ocp ]]; then
     fi
 
     ### source install ###
-    BUILD_DEPS="python3-devel gcc gcc-c++"
+    BUILD_DEPS="python3-devel gcc gcc-c++ python3-wheel"
 
     # NOTE(elfosardo): wheel is needed because of pip "no-build-isolation" option
     # setting installation of setuptoools here as we may want to remove it
     # in teh future once the container build is done
-    dnf install -y python3-pip python3-wheel 'python3-setuptools >= 64.0.0' $BUILD_DEPS
+    dnf install -y python3-pip 'python3-setuptools >= 64.0.0' $BUILD_DEPS
 
     # NOTE(elfosardo): --no-index is used to install the packages emulating
     # an isolated environment in CI. Do not use the option for downstream
