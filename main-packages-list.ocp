@@ -12,7 +12,7 @@ ipxe-bootimgs-aarch64
 ipxe-bootimgs-x86
 ipxe-roms-qemu
 mod_ssl
-python3-automaton >= 3.2.0-0.20240522151206.9255778.el9
+python3-automaton
 python3-cliff >= 4.7.0-0.20240708130156.b75afa0.el9
 python3-construct
 python3-debtcollector >= 3.0.0-0.20240522153257.0e6ce1c.el9
