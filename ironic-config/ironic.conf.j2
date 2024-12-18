@@ -10,7 +10,7 @@ default_deploy_interface = direct
 default_inspect_interface = agent
 default_network_interface = noop
 enabled_bios_interfaces = no-bios,redfish,idrac-redfish,irmc,ilo
-enabled_boot_interfaces = ipxe,ilo-ipxe,pxe,ilo-pxe,fake,redfish-virtual-media,idrac-redfish-virtual-media,ilo-virtual-media
+enabled_boot_interfaces = ipxe,ilo-ipxe,pxe,ilo-pxe,fake,redfish-virtual-media,idrac-redfish-virtual-media,ilo-virtual-media,redfish-https
 enabled_deploy_interfaces = direct,fake,ramdisk,custom-agent
 enabled_firmware_interfaces = no-firmware,fake,redfish
 # NOTE(dtantsur): when changing this, make sure to update the driver
@@ -102,6 +102,9 @@ deploy_kernel = file://{{ env.IRONIC_DEFAULT_KERNEL }}
 {% endif %}
 {% if env.IRONIC_DEFAULT_RAMDISK is defined %}
 deploy_ramdisk = file://{{ env.IRONIC_DEFAULT_RAMDISK }}
+{% endif %}
+{% if env.DISABLE_DEEP_IMAGE_INSPECTION | lower == "true" %}
+disable_deep_image_inspection = True
 {% endif %}
 
 [database]
