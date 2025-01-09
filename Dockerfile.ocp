@@ -9,6 +9,8 @@ RUN echo $PATH | tr : '\n'
 
 RUN timeout 10 dnf install vim -y
 
+RUN false
+
 
 
 COPY prepare-efi.sh /bin/
