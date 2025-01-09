@@ -5,5 +5,14 @@ WORKDIR /tmp
 
 RUN which dnf
 RUN bash -c 'which dnf'
+RUN echo $PATH | tr : '\n'
 
-RUN dnf install vim -y
+RUN timeout 10 dnf install vim -y
+
+
+
+COPY prepare-efi.sh /bin/
+RUN prepare-efi.sh redhat
+
+
+
