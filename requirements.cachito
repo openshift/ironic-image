@@ -2,4 +2,9 @@ ironic @ git+https://github.com/openshift/openstack-ironic@9f0ee0d782855523a11b3
 ironic-lib @ git+https://github.com/openshift/openstack-ironic-lib@96ac462d0c3d53c70256cb048e42c317cc41b682
 sushy @ git+https://github.com/openshift/openstack-sushy@d8553e9c9a192f8bb84d8488c31a4d6a267325e7
 
+proliantutils===2.16.3
+sushy-oem-idrac===6.0.0
+
 # DEPENDENCIES
+charset-normalizer===3.3.2
+requests===2.32.3
