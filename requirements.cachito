@@ -2,6 +2,7 @@ ironic @ git+https://github.com/openshift/openstack-ironic@7f8f0c909fc9a6c80d6e0
 sushy @ git+https://github.com/openshift/openstack-sushy@48e0e7c88634b1c59772ab7cd51fa59ff3258da0
 
 proliantutils===2.16.3
+python-scciclient===0.17.0
 sushy-oem-idrac===6.0.0
 
 # DEPENDENCIES
