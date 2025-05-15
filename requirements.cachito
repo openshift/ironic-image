@@ -5,3 +5,8 @@ proliantutils===2.16.3
 python-scciclient===0.17.0
 
 # DEPENDENCIES
+# NOTE(elfosardo) installing keyring and its deps from source until
+# we have the new python 3.12 package
+keyring===25.6.0
+jaraco.classes===3.4.0
+jaraco.context===6.0.1
