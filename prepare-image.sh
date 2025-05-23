@@ -6,6 +6,8 @@ echo "install_weak_deps=False" >> /etc/dnf/dnf.conf
 # Tell RPM to skip installing documentation
 echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
 
+cat /etc/yum.repos.art/ci/base-4-19-rhel-9-ironic-prevalidation.repo
+
 dnf upgrade -y
 xargs -rtd'\n' dnf install -y < /tmp/${PKGS_LIST}
 if [ $(uname -m) = "x86_64" ]; then
