@@ -2,6 +2,14 @@ ironic @ git+https://github.com/openshift/openstack-ironic@7f8f0c909fc9a6c80d6e0
 sushy @ git+https://github.com/openshift/openstack-sushy@559747cd4d758fe2b8502208c6536f9cb348f239
 
 proliantutils===2.16.3
+python-ironicclient===4.9.0
 python-scciclient===0.17.0
 
 # DEPENDENCIES
+automaton===3.2.0
+packaging===25.0
+Paste===3.10.1
+PasteDeploy===3.1.0
+pycdlib===1.14.0
+typing-extensions===4.12.0
+zipp===3.21.0
