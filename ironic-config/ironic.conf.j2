@@ -60,6 +60,7 @@ deploy_logs_local_path = /shared/log/ironic/deploy
 # retries here works around such problems without affecting the normal path.
 # See https://bugzilla.redhat.com/show_bug.cgi?id=1822763
 max_command_attempts = 30
+certificates_path = {{ env.IRONIC_GEN_CERT_DIR }}
 
 [api]
 {% if env.IRONIC_REVERSE_PROXY_SETUP == "true" %}
@@ -86,36 +87,34 @@ api_workers = {{ env.NUMWORKERS }}
 automated_clean = {{ env.IRONIC_AUTOMATED_CLEAN }}
 # NOTE(dtantsur): keep aligned with [pxe]boot_retry_timeout below.
 deploy_callback_timeout = 4800
-send_sensor_data = {{ env.SEND_SENSOR_DATA }}
-# NOTE(TheJulia): Do not lower this value below 120 seconds.
-# Power state is checked every 60 seconds and BMC activity should
-# be avoided more often than once every sixty seconds.
-send_sensor_data_interval = 160
-bootloader = http://{{ env.IRONIC_URL_HOST }}:{{ env.HTTP_PORT }}/uefi_esp.img
+bootloader = file:///templates/uefi_esp.img
 verify_step_priority_override = management.clear_job_queue:90
 # We don't use this feature, and it creates an additional load on the database
 node_history = False
 # Provide for a timeout longer than 60 seconds for certain vendor's hardware
 power_state_change_timeout = 120
-{% if env.IRONIC_DEFAULT_KERNEL is defined %}
-deploy_kernel = file://{{ env.IRONIC_DEFAULT_KERNEL }}
+{% if env.DEPLOY_KERNEL_URL is defined %}
+deploy_kernel = {{ env.DEPLOY_KERNEL_URL }}
 {% endif %}
-{% if env.IRONIC_DEFAULT_RAMDISK is defined %}
-deploy_ramdisk = file://{{ env.IRONIC_DEFAULT_RAMDISK }}
+{% if env.DEPLOY_RAMDISK_URL is defined %}
+deploy_ramdisk = {{ env.DEPLOY_RAMDISK_URL }}
 {% endif %}
 {% if env.DISABLE_DEEP_IMAGE_INSPECTION | lower == "true" %}
 disable_deep_image_inspection = True
 {% endif %}
+# Allowed path for file:// links: ipa-downloader uses /shared/html/images,
+# while the bootloader configuration above refers to /templates.
+file_url_allowed_paths = /shared/html/images,/templates
 
 [database]
-{% if env.IRONIC_USE_MARIADB | lower == "false" %}
-connection = sqlite:////var/lib/ironic/ironic.sqlite
+{% if env.IRONIC_USE_MARIADB | lower == "true" %}
+connection = {{ env.MARIADB_CONNECTION }}
+{% else %}
+connection = {{ env.LOCAL_DB_URI }}
 # Synchronous mode is required for data integrity in case of operating system
 # crash. In our case we restart the container from scratch, so we can save some
 # IO by not doing syncs all the time.
 sqlite_synchronous = False
-{% else %}
-connection = {{ env.MARIADB_CONNECTION }}
 {% endif %}
 
 [deploy]
@@ -123,7 +122,7 @@ default_boot_option = local
 erase_devices_metadata_priority = 10
 erase_devices_priority = 0
 http_root = /shared/html/
-http_url = http://{{ env.IRONIC_URL_HOST }}:{{ env.HTTP_PORT }}
+http_url = {{ env.IRONIC_HTTP_URL }}
 fast_track = {{ env.IRONIC_FAST_TRACK }}
 {% if env.IRONIC_BOOT_ISO_SOURCE %}
 ramdisk_image_download_source = {{ env.IRONIC_BOOT_ISO_SOURCE }}
@@ -190,7 +189,7 @@ cipher_suite_versions = 3,17
 # unauthenticated connections from other processes in the same host since the
 # containers are in host networking.
 auth_strategy = http_basic
-http_basic_auth_user_file = /etc/ironic/htpasswd-rpc
+http_basic_auth_user_file = {{ env.IRONIC_RPC_HTPASSWD_FILE }}
 host_ip = {% if env.LISTEN_ALL_INTERFACES | lower == "true" %}::{% else %}{{ env.IRONIC_IP }}{% endif %}
 {% if env.IRONIC_TLS_SETUP == "true" %}
 use_ssl = true
@@ -202,10 +201,25 @@ insecure = {{ env.IRONIC_INSECURE }}
 [nova]
 send_power_notifications = false
 
+# Sections (oslo_messaging_notifications, sensor_data, metrics) required for sensor data collection using ironic-prometheus-exporter (IPE):
+{% if env.SEND_SENSOR_DATA | lower == "true" %}
 [oslo_messaging_notifications]
 driver = prometheus_exporter
 location = /shared/ironic_prometheus_exporter
 transport_url = fake://
+
+[sensor_data]
+send_sensor_data = {{ env.SEND_SENSOR_DATA }}
+# NOTE(TheJulia): Do not lower this value below 120 seconds.
+# Power state is checked every 60 seconds and BMC activity should
+# be avoided more often than once every sixty seconds.
+interval = 160
+# Additional sensor_data options can be configured via OS_ environment variables:
+# https://docs.openstack.org/ironic/latest/configuration/config.html#sensor-data
+
+[metrics]
+backend = collector
+{% endif %}
 
 [pxe]
 # NOTE(dtantsur): keep this value at least 3x lower than
@@ -226,7 +240,7 @@ enable_netboot_fallback = true
 # Enable the fallback path to in-band inspection
 ipxe_fallback_script = inspector.ipxe
 {% if env.IPXE_TLS_SETUP | lower == "true" %}
-ipxe_config_template = /tmp/ipxe_config.template
+ipxe_config_template = /templates/ipxe_config.template
 {% endif %}
 
 [redfish]
