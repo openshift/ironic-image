@@ -7,6 +7,7 @@ echo "install_weak_deps=False" >> /etc/dnf/dnf.conf
 echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
 
 dnf upgrade -y
+
 xargs -rtd'\n' dnf install -y < /tmp/${PKGS_LIST}
 if [ $(uname -m) = "x86_64" ]; then
     dnf install -y syslinux-nonlinux;
@@ -34,12 +35,12 @@ if  [[ -f /tmp/main-packages-list.ocp ]]; then
     fi
 
     ### source install ###
-    BUILD_DEPS="python3-devel gcc gcc-c++ python3-wheel"
+    BUILD_DEPS="python3.12-devel gcc gcc-c++ python3.12-wheel"
 
     # NOTE(elfosardo): wheel is needed because of pip "no-build-isolation" option
     # setting installation of setuptoools here as we may want to remove it
     # in teh future once the container build is done
-    dnf install -y python3-pip 'python3-setuptools >= 64.0.0' $BUILD_DEPS
+    dnf install -y python3.12-pip 'python3.12-setuptools >= 64.0.0' python3.12-setuptools_scm $BUILD_DEPS
 
     # NOTE(elfosardo): --no-index is used to install the packages emulating
     # an isolated environment in CI. Do not use the option for downstream
@@ -67,12 +68,12 @@ if  [[ -f /tmp/main-packages-list.ocp ]]; then
     # See https://issues.redhat.com/browse/METAL-1049 for more details.
     PIP_SOURCES_DIR="all_sources"
     mkdir $PIP_SOURCES_DIR
-    python3 -m pip download --no-binary=:all: --no-build-isolation --no-deps -r "${REQS}" -d $PIP_SOURCES_DIR
-    python3 -m pip install $PIP_OPTIONS --prefix /usr -r "${REQS}" -f $PIP_SOURCES_DIR
+    python3.12 -m pip download --no-binary=:all: --no-build-isolation --no-deps -r "${REQS}" -d $PIP_SOURCES_DIR
+    python3.12 -m pip install $PIP_OPTIONS --prefix /usr -r "${REQS}" -f $PIP_SOURCES_DIR
 
     # NOTE(janders) since we set --no-compile at install time, we need to
     # compile post-install (see RHEL-29028)
-    python3 -m compileall --invalidation-mode=timestamp -q /usr
+    python3.12 -m compileall --invalidation-mode=timestamp -q /usr
 
     # ironic system configuration
     mkdir -p /var/log/ironic /var/lib/ironic
