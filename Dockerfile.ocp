@@ -16,6 +16,7 @@ ARG EXTRA_PKGS_LIST
 
 COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} /tmp/
 COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh /bin/
+COPY scripts/* /bin/
 
 # some cachito magic
 COPY "$REMOTE_SOURCES" "$REMOTE_SOURCES_DIR"
@@ -25,8 +26,6 @@ RUN dnf config-manager --disable rhel-9-openstack-17-rpms  || true && \
     rm -f /bin/prepare-image.sh && \
     /bin/prepare-ipxe.sh && \
     rm -f /tmp/prepare-ipxe.sh
-
-COPY scripts/* /bin/
 
 # IRONIC #
 COPY --from=builder /tmp/esp.img /tmp/uefi_esp.img

@@ -19,19 +19,23 @@ export IRONIC_ENABLE_VLAN_INTERFACES=${IRONIC_ENABLE_VLAN_INTERFACES:-all}
 
 export HTTP_PORT=${HTTP_PORT:-80}
 
-MARIADB_PASSWORD=${MARIADB_PASSWORD:-change_me}
-MARIADB_DATABASE=${MARIADB_DATABASE:-ironic}
-MARIADB_USER=${MARIADB_USER:-ironic}
-MARIADB_HOST=${MARIADB_HOST:-127.0.0.1}
-export MARIADB_CONNECTION="mysql+pymysql://${MARIADB_USER}:${MARIADB_PASSWORD}@${MARIADB_HOST}/${MARIADB_DATABASE}?charset=utf8"
-if [[ "$MARIADB_TLS_ENABLED" == "true" ]]; then
-    export MARIADB_CONNECTION="${MARIADB_CONNECTION}&ssl=on&ssl_ca=${MARIADB_CACERT_FILE}"
+if [[ "${IRONIC_USE_MARIADB}" == true ]]; then
+    if [[ -z "${MARIADB_PASSWORD:-}" ]]; then
+        echo "FATAL: IRONIC_USE_MARIADB requires password, mount a secret under /auth/mariadb"
+        exit 1
+    fi
+    MARIADB_DATABASE=${MARIADB_DATABASE:-ironic}
+    MARIADB_USER=${MARIADB_USER:-ironic}
+    MARIADB_HOST=${MARIADB_HOST:-127.0.0.1}
+    export MARIADB_CONNECTION="mysql+pymysql://${MARIADB_USER}:${MARIADB_PASSWORD}@${MARIADB_HOST}/${MARIADB_DATABASE}?charset=utf8"
+    if [[ "$MARIADB_TLS_ENABLED" == "true" ]]; then
+        export MARIADB_CONNECTION="${MARIADB_CONNECTION}&ssl=on&ssl_ca=${MARIADB_CACERT_FILE}"
+    fi
 fi
 
 # zero makes it do cpu number detection on Ironic side
 export NUMWORKERS=${NUMWORKERS:-0}
 
-export IRONIC_USE_MARIADB=${IRONIC_USE_MARIADB:-true}
 
 # Whether to enable fast_track provisioning or not
 export IRONIC_FAST_TRACK=${IRONIC_FAST_TRACK:-true}
@@ -50,8 +54,6 @@ wait_for_interface_or_ip
 # Hostname to use for the current conductor instance.
 export IRONIC_CONDUCTOR_HOST=${IRONIC_CONDUCTOR_HOST:-${IRONIC_URL_HOST}}
 
-export IRONIC_BASE_URL=${IRONIC_BASE_URL:-"${IRONIC_SCHEME}://${IRONIC_URL_HOST}:${IRONIC_ACCESS_PORT}"}
-
 if [[ -n "$IRONIC_EXTERNAL_IP" ]]; then
     export IRONIC_EXTERNAL_CALLBACK_URL=${IRONIC_EXTERNAL_CALLBACK_URL:-"${IRONIC_SCHEME}://${IRONIC_EXTERNAL_IP}:${IRONIC_ACCESS_PORT}"}
     if [[ "$IRONIC_VMEDIA_TLS_SETUP" == "true" ]]; then
@@ -62,14 +64,15 @@ if [[ -n "$IRONIC_EXTERNAL_IP" ]]; then
 fi
 
 IMAGE_CACHE_PREFIX=/shared/html/images/ironic-python-agent
-if [[ -f "${IMAGE_CACHE_PREFIX}.kernel" ]] && [[ -f "${IMAGE_CACHE_PREFIX}.initramfs" ]]; then
-    export IRONIC_DEFAULT_KERNEL="${IMAGE_CACHE_PREFIX}.kernel"
-    export IRONIC_DEFAULT_RAMDISK="${IMAGE_CACHE_PREFIX}.initramfs"
+if [[ -z "${DEPLOY_KERNEL_URL:-}" ]] && [[ -z "${DEPLOY_RAMDISK_URL:-}" ]] && \
+       [[ -f "${IMAGE_CACHE_PREFIX}.kernel" ]] && [[ -f "${IMAGE_CACHE_PREFIX}.initramfs" ]]; then
+    export DEPLOY_KERNEL_URL="file://${IMAGE_CACHE_PREFIX}.kernel"
+    export DEPLOY_RAMDISK_URL="file://${IMAGE_CACHE_PREFIX}.initramfs"
 fi
 
-if [[ -f /etc/ironic/ironic.conf ]]; then
+if [[ -f "${IRONIC_CONF_DIR}/ironic.conf" ]]; then
     # Make a copy of the original supposed empty configuration file
-    cp /etc/ironic/ironic.conf /etc/ironic/ironic.conf_orig
+    cp "${IRONIC_CONF_DIR}/ironic.conf" "${IRONIC_CONF_DIR}/ironic.conf.orig"
 fi
 
 # oslo.config also supports Config Opts From Environment, log them to stdout
@@ -89,26 +92,10 @@ if [[ -f /proc/sys/crypto/fips_enabled ]]; then
 fi
 
 # The original ironic.conf is empty, and can be found in ironic.conf_orig
-render_j2_config /etc/ironic/ironic.conf.j2 /etc/ironic/ironic.conf
+render_j2_config "/etc/ironic/ironic.conf.j2" \
+    "${IRONIC_CONF_DIR}/ironic.conf"
 
 configure_json_rpc_auth
 
 # Make sure ironic traffic bypasses any proxies
 export NO_PROXY="${NO_PROXY:-},$IRONIC_IP"
-
-PROBE_CURL_ARGS=
-if [[ "${IRONIC_REVERSE_PROXY_SETUP}" == "true" ]]; then
-    if [[ "${IRONIC_PRIVATE_PORT}" == "unix" ]]; then
-        PROBE_URL="http://127.0.0.1:6385"
-        PROBE_CURL_ARGS="--unix-socket /shared/ironic.sock"
-    else
-        PROBE_URL="http://127.0.0.1:${IRONIC_PRIVATE_PORT}"
-    fi
-else
-        PROBE_URL="${IRONIC_BASE_URL}"
-fi
-export PROBE_CURL_ARGS
-export PROBE_URL
-
-PROBE_KIND=readiness render_j2_config /bin/ironic-probe.j2 /bin/ironic-readiness
-PROBE_KIND=liveness render_j2_config /bin/ironic-probe.j2 /bin/ironic-liveness
