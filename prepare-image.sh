@@ -7,6 +7,7 @@ echo "install_weak_deps=False" >> /etc/dnf/dnf.conf
 echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
 
 dnf upgrade -y
+
 xargs -rtd'\n' dnf install -y < /tmp/${PKGS_LIST}
 if [ $(uname -m) = "x86_64" ]; then
     dnf install -y syslinux-nonlinux;
@@ -101,3 +102,7 @@ usermod -aG ironic apache
 
 dnf clean all
 rm -rf /var/cache/{yum,dnf}/*
+
+mv /bin/ironic-probe.sh /bin/ironic-readiness
+cp /bin/ironic-readiness /bin/ironic-liveness
+mkdir /data /conf
