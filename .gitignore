@@ -1,1 +1,3 @@
 openstack-ironic
+# Common editor temp files
+*.swp

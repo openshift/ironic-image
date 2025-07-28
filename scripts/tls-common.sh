@@ -20,11 +20,6 @@ export MARIADB_CACERT_FILE=/certs/ca/mariadb/tls.crt
 
 export IPXE_TLS_PORT="${IPXE_TLS_PORT:-8084}"
 
-mkdir -p /certs/ironic
-mkdir -p /certs/ca/ironic
-mkdir -p /certs/ipxe
-mkdir -p /certs/vmedia
-
 if [[ -f "$IRONIC_CERT_FILE" ]] && [[ ! -f "$IRONIC_KEY_FILE" ]]; then
     echo "Missing TLS Certificate key file $IRONIC_KEY_FILE"
     exit 1
@@ -69,6 +64,7 @@ if [[ -f "$IRONIC_CERT_FILE" ]] || [[ -f "$IRONIC_CACERT_FILE" ]]; then
     export IRONIC_TLS_SETUP="true"
     export IRONIC_SCHEME="https"
     if [[ ! -f "$IRONIC_CACERT_FILE" ]]; then
+        mkdir -p "$(dirname "${IRONIC_CACERT_FILE}")"
         copy_atomic "$IRONIC_CERT_FILE" "$IRONIC_CACERT_FILE"
     fi
 else
@@ -95,3 +91,21 @@ if [[ -f "$MARIADB_CACERT_FILE" ]]; then
 else
     export MARIADB_TLS_ENABLED="false"
 fi
+
+configure_restart_on_certificate_update()
+{
+    local enabled="$1"
+    local service="$2"
+    local cert_file="$3"
+    local signal="TERM"
+
+    if [[ "${enabled}" == "true" ]] && [[ "${RESTART_CONTAINER_CERTIFICATE_UPDATED}" == "true" ]]; then
+        if [[ "${service}" == httpd ]]; then
+            signal="WINCH"
+        fi
+        python3.12 -m pyinotify --raw-format -e IN_DELETE_SELF -v "${cert_file}" |
+            while read -r; do
+                pkill "-${signal}" "${service}"
+            done &
+    fi
+}
