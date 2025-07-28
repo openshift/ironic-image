@@ -28,29 +28,31 @@ wait_for_interface_or_ip
 mkdir -p /shared/html
 chmod 0777 /shared/html
 
-IRONIC_BASE_URL="${IRONIC_SCHEME}://${IRONIC_URL_HOST}"
-
-INSPECTION_EXTRA_ARGS=" ipa-inspection-callback-url=${IRONIC_BASE_URL}:${IRONIC_ACCESS_PORT}/v1/continue_inspection"
+INSPECTOR_EXTRA_ARGS=" ipa-inspection-callback-url=${IRONIC_BASE_URL}/v1/continue_inspection"
 
 if [[ "$IRONIC_FAST_TRACK" == "true" ]]; then
-    INSPECTION_EXTRA_ARGS+=" ipa-api-url=${IRONIC_BASE_URL}:${IRONIC_ACCESS_PORT}"
+    INSPECTOR_EXTRA_ARGS+=" ipa-api-url=${IRONIC_BASE_URL}"
 fi
-export INSPECTION_EXTRA_ARGS
+export INSPECTOR_EXTRA_ARGS
 
 # shellcheck disable=SC1091
 . /bin/coreos-ipa-common.sh
 
 # Copy files to shared mount
-render_j2_config /tmp/inspector.ipxe.j2 /shared/html/inspector.ipxe
-cp /tmp/uefi_esp.img /shared/html/uefi_esp.img
-mv /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf.example
+render_j2_config /templates/inspector.ipxe.j2 /shared/html/inspector.ipxe
+# cp -r /etc/httpd/* "${HTTPD_DIR}"
+if [[ -f "${HTTPD_CONF_DIR}/httpd.conf" ]]; then
+    mv "${HTTPD_CONF_DIR}/httpd.conf" "${HTTPD_CONF_DIR}/httpd.conf.example"
+fi
 
 # Render the core httpd config
-render_j2_config /etc/httpd/conf/httpd.conf.j2 /etc/httpd/conf/httpd.conf
+render_j2_config "/etc/httpd/conf/httpd.conf.j2" \
+    "${HTTPD_CONF_DIR}/httpd.conf"
 
 if [[ "$IRONIC_TLS_SETUP" == "true" ]]; then
     if [[ "${IRONIC_REVERSE_PROXY_SETUP}" == "true" ]]; then
-        render_j2_config /tmp/httpd-ironic-api.conf.j2 /etc/httpd/conf.d/ironic.conf
+        render_j2_config "/templates/httpd-ironic-api.conf.j2" \
+            "${HTTPD_CONF_DIR_D}/ironic.conf"
     fi
 else
     export IRONIC_REVERSE_PROXY_SETUP="false" # If TLS is not used, we have no reason to use the reverse proxy
@@ -60,33 +62,24 @@ write_htpasswd_files
 
 # Render httpd TLS configuration for /shared/html/<redifsh;ilo>
 if [[ "$IRONIC_VMEDIA_TLS_SETUP" == "true" ]]; then
-    render_j2_config /etc/httpd-vmedia.conf.j2 /etc/httpd/conf.d/vmedia.conf
+    render_j2_config "/templates/httpd-vmedia.conf.j2" \
+        "${HTTPD_CONF_DIR_D}/vmedia.conf"
 fi
 
 # Render httpd TLS configuration for /shared/html
 if [[ "$IPXE_TLS_SETUP" == "true" ]]; then
     mkdir -p /shared/html/custom-ipxe
     chmod 0777 /shared/html/custom-ipxe
-    render_j2_config "/etc/httpd-ipxe.conf.j2" "/etc/httpd/conf.d/ipxe.conf"
+    render_j2_config "/templates/httpd-ipxe.conf.j2" "${HTTPD_CONF_DIR_D}/ipxe.conf"
     cp "${IPXE_CUSTOM_FIRMWARE_DIR}/undionly.kpxe" \
        "${IPXE_CUSTOM_FIRMWARE_DIR}/snponly.efi" \
        "/shared/html/custom-ipxe"
 fi
 
 # Set up inotify to kill the container (restart) whenever cert files for ironic api change
-if [[ "$IRONIC_TLS_SETUP" == "true" ]] && [[ "${RESTART_CONTAINER_CERTIFICATE_UPDATED}" == "true" ]]; then
-    python3.12 -m pyinotify -e IN_DELETE_SELF -v "${IRONIC_CERT_FILE}" |
-        while read -r file event; do
-            kill -WINCH $(pgrep httpd)
-        done &
-fi
+configure_restart_on_certificate_update "${IRONIC_TLS_SETUP}" httpd "${IRONIC_CERT_FILE}"
 
 # Set up inotify to kill the container (restart) whenever cert of httpd for /shared/html/<redifsh;ilo> path change
-if [[ "$IRONIC_VMEDIA_TLS_SETUP" == "true" ]] && [[ "${RESTART_CONTAINER_CERTIFICATE_UPDATED}" == "true" ]]; then
-    python3.12 -m pyinotify -e IN_DELETE_SELF -v "${IRONIC_VMEDIA_CERT_FILE}" |
-        while read -r file event; do
-            kill -WINCH $(pgrep httpd)
-        done &
-fi
+configure_restart_on_certificate_update "${IRONIC_VMEDIA_TLS_SETUP}" httpd "${IRONIC_VMEDIA_CERT_FILE}"
 
-exec /usr/sbin/httpd -DFOREGROUND
+exec /usr/sbin/httpd -DFOREGROUND -f "${HTTPD_CONF_DIR}/httpd.conf"
