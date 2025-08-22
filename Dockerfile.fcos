@@ -12,7 +12,7 @@ ENV PKGS_LIST=main-packages-list.okd
 ARG EXTRA_PKGS_LIST
 
 COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} /tmp/
-COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh /bin/
+COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh scripts/* /bin/
 
 # Configure OpenStack repos
 RUN sed -E -i 's/( =.*| >=.*)//g' /tmp/${PKGS_LIST} && \
@@ -23,8 +23,6 @@ RUN prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
     /bin/prepare-ipxe.sh && \
     rm -f /tmp/prepare-ipxe.sh
-
-COPY scripts/* /bin/
 
 # IRONIC #
 COPY --from=builder /tmp/esp.img /tmp/uefi_esp.img
