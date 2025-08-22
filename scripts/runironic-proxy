@@ -15,11 +15,14 @@ if [[ "$IRONIC_UPSTREAM_IP" =~ .*:.* ]]; then
     export IRONIC_UPSTREAM_IP="[$IRONIC_UPSTREAM_IP]"
 fi
 
-sed -i 's/^Listen .*$/Listen [::]:'"$IRONIC_PROXY_PORT"'/' /etc/httpd/conf/httpd.conf
-# Log to std out/err
-sed -i -e 's%^ \+CustomLog.*%    CustomLog /dev/stderr combined%g' /etc/httpd/conf/httpd.conf
-sed -i -e 's%^ErrorLog.*%ErrorLog /dev/stderr%g' /etc/httpd/conf/httpd.conf
+if [[ -f "${HTTPD_CONF_DIR}/httpd.conf" ]]; then
+    mv "${HTTPD_CONF_DIR}/httpd.conf" "${HTTPD_CONF_DIR}/httpd.conf.example"
+fi
 
-render_j2_config /etc/httpd-proxy.conf.j2 /etc/httpd/conf.d/ironic-proxy.conf
+# Render the core httpd config
+render_j2_config "/etc/httpd/conf/httpd-ironic-proxy.conf.j2" \
+    "${HTTPD_CONF_DIR}/httpd.conf"
 
-exec /usr/sbin/httpd -DFOREGROUND
+render_j2_config /etc/httpd-proxy.conf.j2 "${HTTPD_CONF_DIR_D}/ironic-proxy.conf"
+
+exec /usr/sbin/httpd -DFOREGROUND -f "${HTTPD_CONF_DIR}/httpd.conf"

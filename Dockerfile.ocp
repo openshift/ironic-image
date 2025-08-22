@@ -36,6 +36,7 @@ COPY ironic-config/ironic.conf.j2 /etc/ironic/
 
 # Custom httpd config, removes all but the bare minimum needed modules
 COPY ironic-config/httpd.conf.j2 /etc/httpd/conf/
+COPY ironic-config/httpd-ironic-proxy.conf.j2 /etc/httpd/conf/
 COPY ironic-config/httpd-modules.conf /etc/httpd/conf.modules.d/
 COPY ironic-config/apache2-vmedia.conf.j2 /templates/httpd-vmedia.conf.j2
 COPY ironic-config/apache2-proxy.conf.j2 /etc/httpd-proxy.conf.j2
