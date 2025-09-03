@@ -182,8 +182,10 @@ command_retry_timeout = 60
 # is not set for the node. (list value)
 cipher_suite_versions = 3,17
 
-{% if env.IRONIC_EXPOSE_JSON_RPC | lower == "true" %}
 [json_rpc]
+# Port must be set unconditionally in case the local RPC is used (OCP 4.20).
+port = {{ env.IRONIC_JSON_RPC_PORT }}
+{% if env.IRONIC_EXPOSE_JSON_RPC | lower == "true" %}
 # We assume that when we run API and conductor in the same container, they use
 # authentication over localhost, using the same credentials as API, to prevent
 # unauthenticated connections from other processes in the same host since the
@@ -195,7 +197,6 @@ host_ip = {% if env.LISTEN_ALL_INTERFACES | lower == "true" %}::{% else %}{{ env
 use_ssl = true
 cafile = {{ env.IRONIC_CACERT_FILE }}
 insecure = {{ env.IRONIC_INSECURE }}
-port = {{ env.IRONIC_JSON_RPC_PORT }}
 {% endif %}
 {% endif %}
 
