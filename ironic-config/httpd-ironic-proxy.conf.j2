@@ -1,0 +1,49 @@
+ServerRoot {{ env.HTTPD_DIR }}
+Listen [::]:{{ env.IRONIC_PROXY_PORT }}
+Include /etc/httpd/conf.modules.d/*.conf
+User apache
+Group apache
+
+<Directory />
+    AllowOverride none
+    Require all denied
+</Directory>
+
+ErrorLog "/dev/stderr"
+
+LogLevel warn
+
+<IfModule log_config_module>
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    LogFormat "%h %l %u %t \"%r\" %>s %b" common
+    <IfModule logio_module>
+      LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O" combinedio
+    </IfModule>
+    CustomLog "/dev/stderr" combined
+</IfModule>
+
+<IfModule mime_module>
+    TypesConfig /etc/mime.types
+    AddType application/x-compress .Z
+    AddType application/x-gzip .gz .tgz
+    AddType text/html .shtml
+    AddOutputFilter INCLUDES .shtml
+</IfModule>
+
+AddDefaultCharset UTF-8
+
+<IfModule mime_magic_module>
+    MIMEMagicFile conf/magic
+</IfModule>
+
+PidFile {{ env.IRONIC_TMP_DATA_DIR }}/httpd.pid
+
+# http TRACE can be subjected to abuse and should be disabled
+TraceEnable off
+
+# provide minimal server information
+ServerTokens Prod
+ServerSignature Off
+
+IncludeOptional conf.d/*.conf
+
