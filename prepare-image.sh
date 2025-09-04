@@ -39,7 +39,7 @@ if  [[ -f /tmp/main-packages-list.ocp ]]; then
 
     # NOTE(elfosardo): wheel is needed because of pip "no-build-isolation" option
     # setting installation of setuptoools here as we may want to remove it
-    # in teh future once the container build is done
+    # in the future once the container build is done
     dnf install -y python3.12-pip 'python3.12-setuptools >= 64.0.0' python3.12-setuptools_scm $BUILD_DEPS
 
     # NOTE(elfosardo): --no-index is used to install the packages emulating

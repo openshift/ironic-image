@@ -1,4 +1,4 @@
-# Please ensure this file is kept in sync with Dockerfile.okd
+# Please ensure this file is kept in sync with Dockerfile.scos
 FROM registry.ci.openshift.org/ocp/4.20:base-rhel9 AS builder
 
 WORKDIR /tmp
