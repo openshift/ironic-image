@@ -9,6 +9,9 @@ echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
 dnf upgrade -y
 
 xargs -rtd'\n' dnf install -y < /tmp/${PKGS_LIST}
+# CentOS 9: xorriso wrapped as genisoimage; CentOS 10+: wrapper removed.
+grep -qw 'xorriso' /tmp/${PKGS_LIST} && echo 'exec xorriso -as mkisofs "$@"' > /usr/bin/genisoimage && chmod +x /usr/bin/genisoimage
+
 if [ $(uname -m) = "x86_64" ]; then
     dnf install -y syslinux-nonlinux;
 fi
