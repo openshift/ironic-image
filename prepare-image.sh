@@ -6,6 +6,47 @@ echo "install_weak_deps=False" >> /etc/dnf/dnf.conf
 # Tell RPM to skip installing documentation
 echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
 
+
+###################debugs
+echo "=== DEBIG: START==="
+echo "=== DEBUG: list repos ==="
+dnf repolist all
+
+echo "=== DEBUG: show python packages ==="
+rpm -qa | grep python || true
+
+echo "=== DEBUG: yum/dnf config ==="
+cat /etc/dnf/dnf.conf || true
+
+echo "=== DEBUG: will run dnf upgrade ==="
+dnf check-release-update || true
+
+echo "=== DEBUG: final installed packages ==="
+rpm -qa | grep python || true
+
+
+echo "=== DEBUG: show repo provides ==="
+dnf repoquery --disablerepo='*' --enablerepo='delorean-master-testing' python3-chardet
+dnf repoquery --disablerepo='*' --enablerepo='baseos' python3-chardet
+
+echo "=== DEBUG: python3-requests packages ==="
+dnf repoquery --disablerepo='*' --enablerepo='delorean-master-testing' python3-requests
+dnf repoquery --disablerepo='*' --enablerepo='baseos' python3-requests
+
+echo "=== DEBUG: dnf upgrade dry-run ==="
+dnf upgrade --assumeno || true
+
+echo "=== DEBUG: PATH ==="
+echo $PATH
+
+echo "=== DEBUG: python versions ==="
+python3 --version || true
+python3.12 --version || true
+
+echo "=== DEBUG: COMPLETE ==="
+############################
+
+
 dnf upgrade -y
 
 xargs -rtd'\n' dnf install -y < /tmp/${PKGS_LIST}
