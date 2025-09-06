@@ -18,7 +18,7 @@ COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
 COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh scripts/*  /bin/
 
 # Configure OpenStack repos
-## Todo: Use stable repos post GA of RDO for centos:stream10 (https://docs.openstack.org/install-guide/environment-packages-rdo.html#id7)
+## Todo: Use stable repos after the GA of RDO for centos:stream10 (https://docs.openstack.org/install-guide/environment-packages-rdo.html#id7)
 RUN curl -o /etc/yum.repos.d/delorean.repo https://trunk.rdoproject.org/centos10-master/consistent/delorean.repo && \
     curl -o /etc/yum.repos.d/dlrn-deps.repo https://trunk.rdoproject.org/centos10-master/dlrn-deps.repo && \
     curl -o /etc/yum.repos.d/rdo-trunk-runtime-deps.repo https://trunk.rdoproject.org/centos10-master/rdo-trunk-runtime-deps.repo
