@@ -38,7 +38,7 @@ RUN curl -o /etc/yum.repos.d/delorean.repo https://trunk.rdoproject.org/centos10
 ## TODO: Remove when python3.12-scciclient installs without issues
 # Install python3-babel (required by python3.12-scciclient; not in CentOS Stream10 repos as of Sept-2025)
 RUN curl -L -o /tmp/python3-babel.rpm https://rpmfind.net/linux/centos-stream/10-stream/CRB/x86_64/os/Packages/python3-babel-2.13.1-4.el10.noarch.rpm \
-    && dnf install -y /tmp/python3-babel.rpm \
+    && dnf install -y /tmp/python3-babel.rpm --nogpgcheck \
     && rm -f /tmp/python3-babel.rpm
 
 RUN prepare-image.sh && \
