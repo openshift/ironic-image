@@ -1,12 +1,25 @@
 # Please ensure this file is kept in sync with Dockerfile.ocp
-FROM quay.io/centos/centos:stream10 AS builder
+FROM quay.io/centos/centos:stream9 AS builder
 
 WORKDIR /tmp
 
 COPY prepare-efi.sh /bin/
 RUN prepare-efi.sh centos
 
-FROM quay.io/centos/centos:stream10
+FROM quay.io/centos/centos:stream9
+
+################ DONT REVIEW THIS SECTION - Will be removed before merging ##############################################
+####                    Waiting for github.com PR to get merged                               ###########################
+# Upgading this centos:stream9 container to stream10
+RUN dnf install -y --nogpgcheck --allowerasing \
+    https://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/centos-stream-release-10.0-10.el10.noarch.rpm \
+    https://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/centos-stream-repos-10.0-10.el10.noarch.rpm \
+    https://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/centos-gpg-keys-10.0-10.el10.noarch.rpm
+RUN rm -f /etc/yum.repos.d/*9.el9.repo && \
+    dnf clean all
+RUN dnf --releasever=10 --allowerasing --setopt=deltarpm=false distro-sync -y
+RUN cat /etc/centos-release
+#########################################################################################################################
 
 ENV PKGS_LIST=main-packages-list.okd
 ARG EXTRA_PKGS_LIST
