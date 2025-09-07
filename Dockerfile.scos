@@ -10,7 +10,7 @@ FROM quay.io/centos/centos:stream9
 
 ################ DON'T REVIEW THIS SECTION - Will be removed before merging ##############################################
 # (Waiting for github.com PR to get merged)
-RUN ls /etc/yum.repos.d && rm /etc/yum.repos.d/centos-addons.repo && rm /etc/yum.repos.d/centos.repo && ls /etc/yum.repos.d && \
+RUN ls /etc/yum.repos.d && rm -rf /etc/yum.repos.d/* && ls /etc/yum.repos.d && \
     dnf install -y --nogpgcheck --allowerasing \
     https://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/centos-stream-release-10.0-10.el10.noarch.rpm \
     https://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/centos-stream-repos-10.0-10.el10.noarch.rpm \
