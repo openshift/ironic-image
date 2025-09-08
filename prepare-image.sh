@@ -8,6 +8,12 @@ echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
 
 dnf upgrade -y
 
+## TODO: Remove when python3.12-scciclient installs without issues (required python3-babel version not in CentOS Stream10 repos as of Sept-2025)
+# Enable the CodeReady Builder (CRB) repository for python3.12-babel.
+if  [[ -f /tmp/main-packages-list.okd ]]; then
+    dnf install -y dnf-plugins-core && dnf config-manager --set-enabled crb
+fi
+
 xargs -rtd'\n' dnf install -y < /tmp/${PKGS_LIST}
 # CentOS 9: xorriso wrapped as genisoimage; CentOS 10+: wrapper removed.
 grep -qw 'xorriso' /tmp/${PKGS_LIST} && echo 'exec xorriso -as mkisofs "$@"' > /usr/bin/genisoimage && chmod +x /usr/bin/genisoimage

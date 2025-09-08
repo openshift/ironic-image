@@ -29,10 +29,6 @@ COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
      /templates/
 COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh scripts/*  /bin/
 
-## TODO: Remove when python3.12-scciclient installs without issues (required python3-babel version not in CentOS Stream10 repos as of Sept-2025)
-# Enable the CodeReady Builder (CRB) repository for python3.12-babel.
-RUN dnf install -y dnf-plugins-core && dnf config-manager --set-enabled crb
-
 # Configure OpenStack repos
 ## Todo: Use stable repos after the GA of RDO for centos:stream10 (https://docs.openstack.org/install-guide/environment-packages-rdo.html#id7)
 RUN curl -o /etc/yum.repos.d/delorean.repo https://trunk.rdoproject.org/centos10-master/consistent/delorean.repo && \
