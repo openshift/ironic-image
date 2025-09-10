@@ -52,13 +52,13 @@ python3.12-paste-deploy
 python3.12-pint
 python3.12-proliantutils
 python3.12-pyghmi
-python3.12-scciclient
 python3.12-stevedore
 python3.12-sushy
 python3.12-sushy-oem-idrac
 python3.12-tooz
 python3.12-werkzeug
 python3.12-zipp
+python3.12-pip
 qemu-img
 sqlite
 util-linux
