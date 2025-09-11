@@ -39,7 +39,7 @@ if  [[ -f /tmp/main-packages-list.ocp ]]; then
 
     # NOTE(elfosardo): wheel is needed because of pip "no-build-isolation" option
     # setting installation of setuptoools here as we may want to remove it
-    # in teh future once the container build is done
+    # in the future once the container build is done
     dnf install -y python3.12-pip 'python3.12-setuptools >= 64.0.0' python3.12-setuptools_scm $BUILD_DEPS
 
     # NOTE(elfosardo): --no-index is used to install the packages emulating
@@ -90,7 +90,33 @@ if  [[ -f /tmp/main-packages-list.ocp ]]; then
 fi
 ###
 
-chown ironic:ironic /var/log/ironic
+### OKD/SCOS Python 3.12 setup
+# Install Python 3.12 versions of OpenStack packages via pip for OKD/SCOS builds
+if [[ -f /tmp/main-packages-list.okd ]]; then
+    
+    IRONIC_UID=1002
+    IRONIC_GID=1003
+    
+    echo "Installing Python 3.12 packages for OKD/SCOS build"
+    
+    # Install Python 3.12 versions of OpenStack packages from requirements file
+    if [[ -f /tmp/python-requirements.okd ]]; then
+        echo "Installing OpenStack packages for Python 3.12 via pip"
+        python3.12 -m pip install --no-cache-dir --prefix /usr -c https://releases.openstack.org/constraints/upper/master -r /tmp/python-requirements.okd
+        
+        # Compile Python files for better performance
+        python3.12 -m compileall --invalidation-mode=timestamp -q /usr
+    fi
+    
+    # Setup ironic system configuration for OKD/SCOS
+    mkdir -p /var/log/ironic /var/lib/ironic
+    getent group ironic >/dev/null || groupadd -r -g "${IRONIC_GID}" ironic
+    getent passwd ironic >/dev/null || useradd -r -g ironic -s /sbin/nologin -u "${IRONIC_UID}" ironic -d /var/lib/ironic
+    
+fi
+###
+
+chown ironic:ironic /var/log/ironic /var/lib/ironic
 # This file is generated after installing mod_ssl and it affects our configuration
 rm -f /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/autoindex.conf /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.modules.d/*.conf
 
