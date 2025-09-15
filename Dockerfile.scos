@@ -8,6 +8,18 @@ RUN prepare-efi.sh centos
 
 FROM quay.io/centos/centos:stream9
 
+################ DON'T REVIEW THIS SECTION - Will be removed before merging ##############################################
+# (Waiting for github.com PR to get merged)
+RUN ls /etc/yum.repos.d && rm -rf /etc/yum.repos.d/* && ls /etc/yum.repos.d && \
+    dnf install -y --nogpgcheck --allowerasing \
+    https://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/centos-stream-release-10.0-10.el10.noarch.rpm \
+    https://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/centos-stream-repos-10.0-10.el10.noarch.rpm \
+    https://mirror.stream.centos.org/10-stream/BaseOS/x86_64/os/Packages/centos-gpg-keys-10.0-10.el10.noarch.rpm  
+RUN dnf clean all
+RUN dnf --releasever=10 --allowerasing --setopt=deltarpm=false distro-sync -y
+RUN cat /etc/centos-release
+#########################################################################################################################
+
 ENV PKGS_LIST=main-packages-list.okd
 ARG EXTRA_PKGS_LIST
 
@@ -18,14 +30,20 @@ COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
 COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh scripts/*  /bin/
 
 # Configure OpenStack repos
-RUN sed -E -i 's/( =.*| >=.*)//g' /tmp/${PKGS_LIST} && \
-    curl -o /etc/yum.repos.d/delorean.repo https://trunk.rdoproject.org/centos9-master/puppet-passed-ci/delorean.repo && \
-    curl -o /etc/yum.repos.d/delorean-deps.repo https://trunk.rdoproject.org/centos9-master/delorean-deps.repo
+## Todo: Use stable repos after the GA of RDO for centos:stream10 (https://docs.openstack.org/install-guide/environment-packages-rdo.html#id7)
+RUN curl -o /etc/yum.repos.d/delorean.repo https://trunk.rdoproject.org/centos10-master/consistent/delorean.repo && \
+    curl -o /etc/yum.repos.d/dlrn-deps.repo https://trunk.rdoproject.org/centos10-master/dlrn-deps.repo && \
+    curl -o /etc/yum.repos.d/rdo-trunk-runtime-deps.repo https://trunk.rdoproject.org/centos10-master/rdo-trunk-runtime-deps.repo
+
+
+# RUN curl -L -o /tmp/python3-babel.rpm https://rpmfind.net/linux/centos-stream/10-stream/CRB/x86_64/os/Packages/python3-babel-2.13.1-4.el10.noarch.rpm \
+#     && dnf install -y /tmp/python3-babel.rpm --setopt=tsflags=noverifysignatures \
+#     && rm -f /tmp/python3-babel.rpm
 
 RUN prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
     /bin/prepare-ipxe.sh && \
-    rm -f /tmp/prepare-ipxe.sh
+    rm -f /bin/prepare-ipxe.sh
 
 COPY scripts/* /bin/
 

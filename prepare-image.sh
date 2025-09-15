@@ -9,6 +9,14 @@ echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
 dnf upgrade -y
 
 xargs -rtd'\n' dnf install -y < /tmp/${PKGS_LIST}
+
+if  [[ -f /tmp/main-packages-list.okd ]]; then
+    # CentOS 9: xorriso wrapped as genisoimage; CentOS 10+: wrapper removed.
+    grep -qw 'xorriso' /tmp/${PKGS_LIST} && echo 'exec xorriso -as mkisofs "$@"' > /usr/bin/genisoimage && chmod +x /usr/bin/genisoimage
+    ## TODO: Remove when python3.12-scciclient installs without issues using dnf (required python3-babel not in CentOS Stream10 repos as of Sept-2025)
+    python3.12 -m pip install python-scciclient
+fi
+
 if [ $(uname -m) = "x86_64" ]; then
     dnf install -y syslinux-nonlinux;
 fi
@@ -39,7 +47,7 @@ if  [[ -f /tmp/main-packages-list.ocp ]]; then
 
     # NOTE(elfosardo): wheel is needed because of pip "no-build-isolation" option
     # setting installation of setuptoools here as we may want to remove it
-    # in teh future once the container build is done
+    # in the future once the container build is done
     dnf install -y python3.12-pip 'python3.12-setuptools >= 64.0.0' python3.12-setuptools_scm $BUILD_DEPS
 
     # NOTE(elfosardo): --no-index is used to install the packages emulating
