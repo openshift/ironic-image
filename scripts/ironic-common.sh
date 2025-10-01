@@ -22,6 +22,7 @@ export IRONIC_DB_DIR="${CUSTOM_DATA_DIR}/db"
 export IRONIC_GEN_CERT_DIR="${CUSTOM_DATA_DIR}/auto_gen_certs"
 export IRONIC_TMP_DATA_DIR="${CUSTOM_DATA_DIR}/tmp"
 export PROBE_CONF_DIR="${CUSTOM_CONFIG_DIR}/probes"
+export ISO_MASTER_PATH="${CUSTOM_DATA_DIR}/master_iso_images"
 
 export HTTP_PORT=${HTTP_PORT:-80}
 #NOTE(elfosardo): the default port for json_rpc in ironic is 8089, but
