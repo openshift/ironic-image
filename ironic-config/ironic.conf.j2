@@ -104,7 +104,7 @@ disable_deep_image_inspection = True
 {% endif %}
 # Allowed path for file:// links: ipa-downloader uses /shared/html/images,
 # while the bootloader configuration above refers to /templates.
-file_url_allowed_paths = /shared/html/images,/templates
+file_url_allowed_paths = /shared/html/images,/templates,/var/lib/ironic/pxe
 
 [database]
 {% if env.IRONIC_USE_MARIADB | lower == "true" %}
