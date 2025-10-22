@@ -19,6 +19,9 @@ if [[ "$USE_IRONIC_INSPECTOR" == "false" ]]; then
     exit 1
 fi
 
+# Ramdisk logs
+mkdir -p /shared/log/ironic-inspector/ramdisk
+
 wait_for_interface_or_ip
 
 IRONIC_INSPECTOR_PORT=${IRONIC_INSPECTOR_ACCESS_PORT}
