@@ -132,16 +132,15 @@ jobs:
           This PR updates `requirements.cachito` with the latest commit hashes from openshift forks repositories.
 
           ### Changes
-
-          #### Ironic (${{ env.IRONIC_REPO }})
-          - **Previous**: `${{ steps.current-hashes.outputs.current_ironic }}`
-          - **New**: `${{ steps.get-commits.outputs.ironic_hash }}`
-          - **Compare**: https://github.com/${{ env.IRONIC_REPO }}/compare/${{ steps.current-hashes.outputs.current_ironic }}..${{ steps.get-commits.outputs.ironic_hash }}
-
-          #### Sushy (${{ env.SUSHY_REPO }})
-          - **Previous**: `${{ steps.current-hashes.outputs.current_sushy }}`
-          - **New**: `${{ steps.get-commits.outputs.sushy_hash }}`
-          - **Compare**: https://github.com/${{ env.SUSHY_REPO }}/compare/${{ steps.current-hashes.outputs.current_sushy }}..${{ steps.get-commits.outputs.sushy_hash }}
+          ${{ steps.get-commits.outputs.ironic_hash != steps.current-hashes.outputs.current_ironic && format('
+          #### Ironic ({0})
+          - **Previous**: `{1}`
+          - **New**: `{2}`
+          - **Compare**: https://github.com/{0}/compare/{1}..{2}', env.IRONIC_REPO, steps.current-hashes.outputs.current_ironic, steps.get-commits.outputs.ironic_hash) || '' }}${{ steps.get-commits.outputs.sushy_hash != steps.current-hashes.outputs.current_sushy && format('
+          #### Sushy ({0})
+          - **Previous**: `{1}`
+          - **New**: `{2}`
+          - **Compare**: https://github.com/{0}/compare/{1}..{2}', env.SUSHY_REPO, steps.current-hashes.outputs.current_sushy, steps.get-commits.outputs.sushy_hash) || '' }}
 
           ### Verification
 
