@@ -248,6 +248,7 @@ ipxe_config_template = /templates/ipxe_config.template
 [redfish]
 use_swift = false
 kernel_append_params = nofb nomodeset vga=normal ipa-insecure=1 {%if env.ENABLE_FIPS_IPA == "1"%}fips=1 {% endif %}{% if env.IRONIC_RAMDISK_SSH_KEY %}sshkey="{{ env.IRONIC_RAMDISK_SSH_KEY|trim }}"{% endif %} {{ env.IRONIC_KERNEL_PARAMS|trim }} systemd.journald.forward_to_console=yes
+firmware_update_wait_unresponsive_bmc = 60
 
 [ilo]
 kernel_append_params = nofb nomodeset vga=normal ipa-insecure=1 {%if env.ENABLE_FIPS_IPA == "1"%}fips=1 {% endif %}{% if env.IRONIC_RAMDISK_SSH_KEY %}sshkey="{{ env.IRONIC_RAMDISK_SSH_KEY|trim }}"{% endif %} {{ env.IRONIC_KERNEL_PARAMS|trim }} systemd.journald.forward_to_console=yes
