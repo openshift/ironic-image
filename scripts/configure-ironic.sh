@@ -80,6 +80,7 @@ echo 'Options set from Environment variables'
 env | grep "^OS_" || true
 
 mkdir -p /shared/html
+mkdir -p /shared/tmp
 mkdir -p /shared/ironic_prometheus_exporter
 
 configure_json_rpc_auth
