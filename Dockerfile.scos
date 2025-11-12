@@ -28,7 +28,8 @@ RUN prepare-image.sh && \
 COPY scripts/* /bin/
 
 # IRONIC #
-COPY --from=builder /tmp/esp.img /tmp/uefi_esp.img
+# Updated this in https://github.com/metal3-io/ironic-image/pull/713/files
+COPY --from=builder /tmp/uefi_esp*.img /templates/
 
 COPY ironic-config/ironic.conf.j2 /etc/ironic/
 
