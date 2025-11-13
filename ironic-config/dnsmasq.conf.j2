@@ -11,14 +11,8 @@ port={{ env.DNS_PORT }}
 {%- if env.DHCP_RANGE | length %}
 log-dhcp
 dhcp-range={{ env.DHCP_RANGE }}
-
-# It can be used when setting DNS or GW variables.
-{%- if env["GATEWAY_IP"] is undefined %}
-# Disable default router(s)
-dhcp-option=3
-{% else %}
-dhcp-option=option{% if ":" in env["GATEWAY_IP"] %}6{% endif %}:router,{{ env["GATEWAY_IP"] }}
 {% endif %}
+
 {%- if env["DNS_IP"] is undefined %}
 # Disable DNS over provisioning network
 dhcp-option=6
@@ -26,35 +20,31 @@ dhcp-option=6
 dhcp-option=option{% if ":" in env["DNS_IP"] %}6{% endif %}:dns-server,{{ env["DNS_IP"] }}
 {% endif %}
 
+{# Network boot options for IPv4 and IPv6 #}
 {%- if env.IPV == "4" or env.IPV is undefined %}
 # IPv4 Configuration:
 dhcp-match=ipxe,175
-# Client is already running iPXE; move to next stage of chainloading
-{%- if env.IPXE_TLS_SETUP == "true"  %}
-# iPXE with (U)EFI
-dhcp-boot=tag:efi,tag:ipxe,http://{{ env.IRONIC_URL_HOST }}:{{ env.HTTP_PORT }}/custom-ipxe/snponly.efi
-# iPXE with BIOS
-dhcp-boot=tag:ipxe,http://{{ env.IRONIC_URL_HOST }}:{{ env.HTTP_PORT }}/custom-ipxe/undionly.kpxe
+
+{# Set the router or disable it. Setting router is IPv4 specific, in v6 there #}
+{# are router advertisements that do the same thing. #}
+{%- if env["GATEWAY_IP"] is undefined %}
+# Disable default router(s)
+dhcp-option=3
 {% else %}
-dhcp-boot=tag:ipxe,http://{{ env.IRONIC_URL_HOST }}:{{ env.HTTP_PORT }}/boot.ipxe
+dhcp-option=option:router,{{ env["GATEWAY_IP"] }}
 {% endif %}
 
 # Note: Need to test EFI booting
 dhcp-match=set:efi,option:client-arch,7
 dhcp-match=set:efi,option:client-arch,9
-dhcp-match=set:efi_arm,option:client-arch,11
-
-# Client is PXE booting over EFI without iPXE ROM; send EFI version of iPXE chainloader do the same also if iPXE ROM boots but TLS is enabled
-{%- if env.IPXE_TLS_SETUP == "true"  %}
-dhcp-boot=tag:efi,tag:ipxe,snponly.efi
+dhcp-match=set:efi,option:client-arch,11
+# Client is (i)PXE booting on EFI machine
+dhcp-boot=tag:efi,/snponly.efi,{{ env.IRONIC_IP }}
+# Client is running (i)PXE on BIOS machine
+dhcp-boot=tag:!efi,/undionly.kpxe,{{ env.IRONIC_IP }}
+{%- if env.IPXE_TLS_SETUP != "true" %}
+dhcp-boot=tag:ipxe,http://{{ env.IRONIC_URL_HOST }}:{{ env.HTTP_PORT }}/boot.ipxe
 {% endif %}
-dhcp-boot=tag:efi,tag:!ipxe,snponly.efi
-
-# Client is PXE booting over EFI without iPXE ROM; send EFI version of iPXE chainloader for aarch64
-dhcp-boot=tag:efi_arm,tag:!ipxe,/arm64-efi/snponly.efi
-
-# Client is running PXE over BIOS; send BIOS version of iPXE chainloader
-dhcp-boot=/undionly.kpxe,{{ env.IRONIC_IP }}
 {% endif %}
 
 {% if env.IPV == "6" %}
@@ -64,22 +54,12 @@ ra-param={{ env.PROVISIONING_INTERFACE }},0,0
 
 dhcp-vendorclass=set:pxe6,enterprise:343,PXEClient
 dhcp-userclass=set:ipxe6,iPXE
-dhcp-option=tag:pxe6,option6:bootfile-url,tftp://{{ env.IRONIC_URL_HOST }}/snponly.efi
-dhcp-option=tag:ipxe6,option6:bootfile-url,http://{{ env.IRONIC_URL_HOST }}:{{ env.HTTP_PORT }}/boot.ipxe
-
-# It can be used when setting DNS or GW variables.
-{%- if env["GATEWAY_IP"] is undefined %}
-# Disable default router(s)
-dhcp-option=3
-{% else %}
-dhcp-option=option{% if ":" in env["GATEWAY_IP"] %}6{% endif %}:router,{{ env["GATEWAY_IP"] }}
-{% endif %}
-{%- if env["DNS_IP"] is undefined %}
-# Disable DNS over provisioning network
-dhcp-option=6
-{% else %}
-dhcp-option=option{% if ":" in env["DNS_IP"] %}6{% endif %}:dns-server,{{ env["DNS_IP"] }}
-{% endif %}
+# Client is (i)PXE booting on EFI machine
+dhcp-option=tag:efi,option6:bootfile-url,{{ env.IRONIC_URL_HOST }}/snponly.efi
+# Client is running (i)PXE on BIOS machine
+dhcp-option=tag:!efi,option6:bootfile-url,{{ env.IRONIC_URL_HOST }}/undionly.kpxe
+{%- if env.IPXE_TLS_SETUP != "true" %}
+dhcp-option=tag:ipxe6,option6:bootfile-url,{{ env.IRONIC_HTTP_URL }}/boot.ipxe
 {% endif %}
 {% endif %}
 
