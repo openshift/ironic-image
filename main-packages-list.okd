@@ -12,6 +12,7 @@ ipxe-bootimgs-aarch64
 ipxe-bootimgs-x86
 ipxe-roms-qemu
 mod_ssl
+procps
 qemu-img
 sqlite
 util-linux
