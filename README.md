@@ -125,6 +125,13 @@ functionality:
   and verify_ca field in driver_info is True or None, the certificates in this
   path will be used.
 
+The following mountpoints can be passed in to customize run-time
+functionality:
+
+- `/certs/ca/bmc` - The storage path of BMC CA certificates. If the path exists
+  and verify_ca field in driver_info is True or None, the certificates in this
+  path will be used.
+
 MariaDB configuration:
 
 - `IRONIC_USE_MARIADB` - Whether to use an external MariaDB database instead of
