@@ -1,12 +1,13 @@
 #!/bin/bash
 
-export IRONIC_CERT_FILE=/certs/ironic/tls.crt
-export IRONIC_KEY_FILE=/certs/ironic/tls.key
-export IRONIC_CACERT_FILE=/certs/ca/ironic/tls.crt
 export IRONIC_INSECURE=${IRONIC_INSECURE:-false}
 export IRONIC_SSL_PROTOCOL=${IRONIC_SSL_PROTOCOL:-"-ALL +TLSv1.2 +TLSv1.3"}
 export IPXE_SSL_PROTOCOL=${IPXE_SSL_PROTOCOL:-"-ALL +TLSv1.2 +TLSv1.3"}
 export IRONIC_VMEDIA_SSL_PROTOCOL=${IRONIC_VMEDIA_SSL_PROTOCOL:-"ALL"}
+
+# Node image storage is using the same cert and port as the API
+export IRONIC_CERT_FILE=/certs/ironic/tls.crt
+export IRONIC_KEY_FILE=/certs/ironic/tls.key
 
 export IRONIC_VMEDIA_CERT_FILE=/certs/vmedia/tls.crt
 export IRONIC_VMEDIA_KEY_FILE=/certs/vmedia/tls.key
@@ -16,9 +17,12 @@ export IPXE_KEY_FILE=/certs/ipxe/tls.key
 
 export RESTART_CONTAINER_CERTIFICATE_UPDATED=${RESTART_CONTAINER_CERTIFICATE_UPDATED:-"false"}
 
+# By default every cert has to be signed with Ironic's
+# CA otherwise node image and IPA verification would fail
 export MARIADB_CACERT_FILE=/certs/ca/mariadb/tls.crt
 export BMC_CACERTS_PATH=/certs/ca/bmc
 export BMC_CACERT_FILE=/conf/bmc-tls.pem
+export IRONIC_CACERT_FILE=/certs/ca/ironic/tls.crt
 
 export IPXE_TLS_PORT="${IPXE_TLS_PORT:-8084}"
 
@@ -103,12 +107,17 @@ configure_restart_on_certificate_update()
 
     if [[ "${enabled}" == "true" ]] && [[ "${RESTART_CONTAINER_CERTIFICATE_UPDATED}" == "true" ]]; then
         if [[ "${service}" == httpd ]]; then
+            # shellcheck disable=SC2034
             signal="WINCH"
         fi
-        python3.12 -m pyinotify --raw-format -e IN_DELETE_SELF -v "${cert_file}" |
-            while read -r; do
-                pkill "-${signal}" "${service}"
-            done &
+
+        # Use watchmedo to monitor certificate file deletion
+        # shellcheck disable=SC2016
+        watchmedo shell-command \
+            --patterns="$(basename "${cert_file}")" \
+            --ignore-directories \
+            --command='if [[ "${watch_event_type}" == "deleted" ]]; then pkill -'"${signal}"' '"${service}"'; fi' \
+            "$(dirname "${cert_file}")" &
     fi
 }
 

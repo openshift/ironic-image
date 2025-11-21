@@ -94,6 +94,36 @@ functionality:
 - `DEPLOY_KERNEL_URL` and `DEPLOY_RAMDISK_URL` provide the default IPA kernel
   and initramfs images. If they're not set, the images from IPA downloader are
   used (if present).
+- `IRONIC_JSON_RPC_PORT` - port used by the ironic json-rpc service (default to
+  6189).
+- `WEBSERVER_CACERT_FILE` - Specifies the CA or CA bundle that will be used
+  by Ironic to verify disk and IPA images.
+
+The following environment variables can be passed to customize the virtual
+media HTTP server configuration:
+
+- `IRONIC_VMEDIA_CURVES` - Setting this variable will set the allowed set of
+  groups allowed for TLS negotiation by order of preference, it needs to be set
+  in the openSSL format like e.g. `x448:x25519:secp256r1:secp384r1`. If let
+  unset it will use default from openSSL.
+- `IRONIC_VMEDIA_TLS_12_CIPHERS` - Setting this variable will set the allowed
+  cipher suites for TLS up to version 1.2 in order, it needs to be set in the
+  openSSL format e.g. `ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305`.
+  If let unset it will use default from openSSL.
+- `IRONIC_VMEDIA_TLS_13_CIPHERS` - Setting this variable will set the allowed
+  cipher suites for TLS up to version 1.3 in order, it needs to be set in the
+  openSSL format e.g. `TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256`. If
+  let unset it will use default from openSSL.
+- `IRONIC_VMEDIA_TLS_ENFORCE_SERVER_CIPHER_ORDER` - Setting this variable to
+  `true` will make the server enforce its cipher list ordering for TLS version
+  up to 1.2, defaults to `false`
+
+The following mountpoints can be passed in to customize run-time
+functionality:
+
+- `/certs/ca/bmc` - The storage path of BMC CA certificates. If the path exists
+  and verify_ca field in driver_info is True or None, the certificates in this
+  path will be used.
 
 The following mountpoints can be passed in to customize run-time
 functionality:
