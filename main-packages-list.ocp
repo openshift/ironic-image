@@ -27,7 +27,7 @@ python3.12-flask >= 1:2.2.5-3.1.el9ocp
 python3.12-futurist >= 3.2.1
 python3.12-gunicorn >= 20.0.4-4.1.el9ocp
 python3.12-inotify >= 0.9.6-26.el9ocp
-python3.12-ironic-prometheus-exporter >= 4.5.0-1.el9ocp
+python3.12-ironic-prometheus-exporter >= 4.7.0-1.el9ocp
 python3.12-ironicclient >= 4.9.0-0.20211209154934.6f1be06.el9
 python3.12-jinja2 >= 3.1.6-1.el9
 python3.12-jsonpath-rw
