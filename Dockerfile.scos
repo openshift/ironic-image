@@ -28,7 +28,7 @@ RUN prepare-image.sh && \
 COPY scripts/* /bin/
 
 # IRONIC #
-COPY --from=builder /tmp/esp.img /tmp/uefi_esp.img
+COPY --from=builder /tmp/uefi_esp_*.img /tmp/
 
 COPY ironic-config/ironic.conf.j2 /etc/ironic/
 
