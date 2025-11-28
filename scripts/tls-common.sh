@@ -2,7 +2,11 @@
 
 export IRONIC_CERT_FILE=/certs/ironic/tls.crt
 export IRONIC_KEY_FILE=/certs/ironic/tls.key
-export IRONIC_CACERT_FILE=/certs/ca/ironic/tls.crt
+# Set the default IRONIC_CACERT_FILE directory under CUSTOM_CONFIG_DIR=/conf,
+# which is also used in ironic-common.sh
+# This is for readOnlyRootFilesystem=true, since IRONIC_CACERT_FILE is
+# copied over during runtime
+export IRONIC_CACERT_FILE=${IRONIC_CACERT_FILE:-/conf/certs/ca/ironic/tls.crt}
 export IRONIC_INSECURE=${IRONIC_INSECURE:-false}
 export IRONIC_SSL_PROTOCOL=${IRONIC_SSL_PROTOCOL:-"-ALL +TLSv1.2 +TLSv1.3"}
 export IPXE_SSL_PROTOCOL=${IPXE_SSL_PROTOCOL:-"-ALL +TLSv1.2 +TLSv1.3"}
@@ -66,6 +70,8 @@ if [[ -f "$IRONIC_CERT_FILE" ]] || [[ -f "$IRONIC_CACERT_FILE" ]]; then
     export IRONIC_TLS_SETUP="true"
     export IRONIC_SCHEME="https"
     if [[ ! -f "$IRONIC_CACERT_FILE" ]]; then
+        # We copy the cert file to cacert file to cover for self-signed
+        # certs scenario.
         mkdir -p "$(dirname "${IRONIC_CACERT_FILE}")"
         copy_atomic "$IRONIC_CERT_FILE" "$IRONIC_CACERT_FILE"
     fi
