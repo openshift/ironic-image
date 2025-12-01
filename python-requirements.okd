@@ -1,4 +1,7 @@
+crudini
 ironic
 proliantutils
 pyghmi
 python-scciclient
+pyasyncore
+pyinotify
