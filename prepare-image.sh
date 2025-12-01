@@ -102,7 +102,7 @@ if [[ -f /tmp/main-packages-list.okd ]]; then
     # Install Python 3.12 versions of OpenStack packages from requirements file
     if [[ -f /tmp/python-requirements.okd ]]; then
         echo "Installing OpenStack packages for Python 3.12 via pip"
-        python3.12 -m pip install --no-cache-dir --prefix /usr -c https://releases.openstack.org/constraints/upper/master -r /tmp/python-requirements.okd
+        python3.12 -m pip install --no-cache-dir --prefix /usr -c https://releases.openstack.org/constraints/upper/2025.2 -r /tmp/python-requirements.okd
         
         # Compile Python files for better performance
         python3.12 -m compileall --invalidation-mode=timestamp -q /usr
