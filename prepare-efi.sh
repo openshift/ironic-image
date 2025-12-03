@@ -52,6 +52,17 @@ build_efi() {
     rpm -e --nodeps "$SHIM_PKG"
 }
 
-for ARCH in x86_64 aarch64; do
+PRIMARY_ARCH=$(uname -m)
+if [[ $PRIMARY_ARCH == "x86_64" ]]; then
+    SECONDARY_ARCH="aarch64"
+elif [[ $PRIMARY_ARCH == "aarch64" ]]; then
+    SECONDARY_ARCH="x86_64"
+else
+    echo "Architecture $PRIMARY_ARCH not supported!"
+    exit 1
+fi
+
+for ARCH in $PRIMARY_ARCH $SECONDARY_ARCH; do
     build_efi
 done
+
