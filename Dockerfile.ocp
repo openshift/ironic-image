@@ -30,7 +30,7 @@ RUN dnf config-manager --disable rhel-9-openstack-17-rpms  || true && \
     rm -f /tmp/prepare-ipxe.sh
 
 # IRONIC #
-COPY --from=builder /tmp/uefi_esp_*.img /tmp/
+COPY --from=builder /tmp/esp.img /tmp/uefi_esp.img
 
 COPY ironic-config/ironic.conf.j2 /etc/ironic/
 

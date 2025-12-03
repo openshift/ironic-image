@@ -27,7 +27,7 @@ RUN prepare-image.sh && \
 COPY scripts/* /bin/
 
 # IRONIC #
-COPY --from=builder /tmp/uefi_esp_*.img /tmp/
+COPY --from=builder /tmp/esp.img /tmp/uefi_esp.img
 
 COPY ironic-config/ironic.conf.j2 /etc/ironic/
 COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 ironic-config/ipxe_config.template /tmp/
