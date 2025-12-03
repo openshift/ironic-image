@@ -18,7 +18,7 @@ COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} /tmp/
 COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
      ironic-config/ipxe_config.template ironic-config/dnsmasq.conf.j2 \
      /templates/
-COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh scripts/*  /bin/
+COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh setup.okd scripts/*  /bin/
 
 # some cachito magic
 COPY "$REMOTE_SOURCES" "$REMOTE_SOURCES_DIR"
