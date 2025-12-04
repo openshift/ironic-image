@@ -22,6 +22,7 @@ RUN dnf install -y python3.12 python3.12-pip python3.12-devel python3.12-setupto
 
 RUN prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
+    rm -f /bin/setup.okd && \
     /bin/prepare-ipxe.sh && \
     rm -f /bin/prepare-ipxe.sh
 
