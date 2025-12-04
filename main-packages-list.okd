@@ -2,6 +2,7 @@ coreos-installer
 dnsmasq
 dosfstools
 genisoimage
+git-core
 httpd
 httpd-tools
 ipcalc
