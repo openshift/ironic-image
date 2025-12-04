@@ -4,6 +4,17 @@ set -euxo pipefail
 
 OS=${1:-centos}
 
+# NOTE(elfosardo): glibc-gconv-extra was included by default in the past and
+# we need it otherwise mkfs.msdos will fail with:
+# ``Cannot initialize conversion from codepage 850 to ANSI_X3.4-1968: Invalid argument``
+# ``Cannot initialize conversion from ANSI_X3.4-1968 to codepage 850: Invalid argument``
+# subsequently making mmd fail with:
+# ``Error converting to codepage 850 Invalid argument``
+# ``Cannot initialize '::'``
+# This is due to the conversion table missing codepage 850, included in glibc-gconv-extra
+# Install common packages once for all architectures
+dnf install -y --allowerasing grub2 dosfstools mtools glibc-gconv-extra
+
 build_efi() {
     DEST=/tmp/uefi_esp_${ARCH}.img
 
@@ -22,16 +33,6 @@ build_efi() {
         touch "$DEST"
         exit 0
     fi
-
-    # NOTE(elfosardo): glibc-gconv-extra was included by default in the past and
-    # we need it otherwise mkfs.msdos will fail with:
-    # ``Cannot initialize conversion from codepage 850 to ANSI_X3.4-1968: Invalid argument``
-    # ``Cannot initialize conversion from ANSI_X3.4-1968 to codepage 850: Invalid argument``
-    # subsequently making mmd fail with:
-    # ``Error converting to codepage 850 Invalid argument``
-    # ``Cannot initialize '::'``
-    # This is due to the conversion table missing codepage 850, included in glibc-gconv-extra
-    dnf install -y --allowerasing grub2 dosfstools mtools glibc-gconv-extra
 
     # grub2-efi-XXX and shim-XXX are architecture specific packages, so force the architecture here
     dnf install -y --allowerasing --forcearch="$ARCH" "$GRUB_PKG" "$SHIM_PKG"
@@ -52,6 +53,20 @@ build_efi() {
     rpm -e --nodeps "$SHIM_PKG"
 }
 
-for ARCH in x86_64 aarch64; do
+# NOTE(elfosardo): we need to build the EFI image for both architectures
+# We run EFI build loop based on actual arch first to avoid conflicts
+# between installed packages
+PRIMARY_ARCH=$(uname -m)
+
+if [[ $PRIMARY_ARCH == "x86_64" ]]; then
+    SECONDARY_ARCH="aarch64"
+elif [[ $PRIMARY_ARCH == "aarch64" ]]; then
+    SECONDARY_ARCH="x86_64"
+else
+    echo "Architecture $PRIMARY_ARCH not supported!"
+    exit 1
+fi
+
+for ARCH in $PRIMARY_ARCH $SECONDARY_ARCH; do
     build_efi
 done
