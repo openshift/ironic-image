@@ -21,6 +21,7 @@ RUN sed -E -i 's/( =.*| >=.*)//g' /tmp/${PKGS_LIST} && \
 
 RUN prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
+    rm -f /bin/setup.okd && \
     /bin/prepare-ipxe.sh && \
     rm -f /tmp/prepare-ipxe.sh
 
