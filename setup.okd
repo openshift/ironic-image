@@ -1,5 +1,7 @@
 #!/usr/bin/bash
 
+# TEST CI
+
 # OKD/SCOS Python 3.12 setup script
 # Install Python 3.12 versions of OpenStack packages via pip for OKD/SCOS builds
 
