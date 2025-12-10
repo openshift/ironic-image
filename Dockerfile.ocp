@@ -2,6 +2,9 @@
 FROM registry.ci.openshift.org/ocp/4.21:base-rhel9-minimal-test AS builder
 WORKDIR /tmp
 
+
+RUN ln -s /bin/dnf_wrapper/microdnf /bin/dnf_wrapper/dnf
+RUN ln -s /bin/microdnf /bin/dnf_wrapper/dnf.real
 COPY prepare-efi.sh /bin/
 RUN dnf config-manager --disable rhel-9-openstack-17-rpms || true
 RUN prepare-efi.sh redhat
