@@ -35,7 +35,8 @@ build_efi() {
     fi
 
     # grub2-efi-XXX and shim-XXX are architecture specific packages, so force the architecture here
-    dnf install -y --allowerasing --forcearch="$ARCH" "$GRUB_PKG" "$SHIM_PKG"
+    microdnf download --arch="$ARCH" "$GRUB_PKG" "$SHIM_PKG"
+    rpm --forcearch="$ARCH" -ivh *.rpm
 
     ## TODO(TheJulia): At some point we may want to try and make the size
     ## of the ESP image file to be sized smaller for the files that need to
