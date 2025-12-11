@@ -13,7 +13,7 @@ OS=${1:-centos}
 # ``Cannot initialize '::'``
 # This is due to the conversion table missing codepage 850, included in glibc-gconv-extra
 # Install common packages once for all architectures
-dnf install -y --allowerasing grub2 dosfstools mtools glibc-gconv-extra
+dnf install -y grub2 dosfstools mtools glibc-gconv-extra
 
 build_efi() {
     DEST=/tmp/uefi_esp_${ARCH}.img
