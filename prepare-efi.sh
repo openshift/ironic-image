@@ -35,7 +35,7 @@ build_efi() {
     fi
 
     # grub2-efi-XXX and shim-XXX are architecture specific packages, so force the architecture here
-    microdnf download --archlist="$ARCH" "$GRUB_PKG" "$SHIM_PKG"
+    microdnf download --resolve --archlist="$ARCH" "$GRUB_PKG" "$SHIM_PKG"
     rpm --ignorearch -ivh *.rpm
 
     ## TODO(TheJulia): At some point we may want to try and make the size
