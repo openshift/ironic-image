@@ -13,7 +13,7 @@ OS=${1:-centos}
 # ``Cannot initialize '::'``
 # This is due to the conversion table missing codepage 850, included in glibc-gconv-extra
 # Install common packages once for all architectures
-dnf install -y --allowerasing grub2 dosfstools mtools glibc-gconv-extra
+dnf install -y grub2 dosfstools mtools glibc-gconv-extra
 
 build_efi() {
     DEST=/tmp/uefi_esp_${ARCH}.img
@@ -35,7 +35,8 @@ build_efi() {
     fi
 
     # grub2-efi-XXX and shim-XXX are architecture specific packages, so force the architecture here
-    dnf install -y --allowerasing --forcearch="$ARCH" "$GRUB_PKG" "$SHIM_PKG"
+    microdnf download --resolve "$GRUB_PKG" "$SHIM_PKG"
+    rpm --ignorearch -ivh *.rpm
 
     ## TODO(TheJulia): At some point we may want to try and make the size
     ## of the ESP image file to be sized smaller for the files that need to

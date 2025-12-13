@@ -1,13 +1,18 @@
 # Please ensure this file is kept in sync with Dockerfile.scos
-FROM registry.ci.openshift.org/ocp/4.21:base-rhel9 AS builder
+FROM registry.ci.openshift.org/ocp/4.21:base-rhel9-minimal-test AS builder
 
 WORKDIR /tmp
 
+
+RUN ln -s /bin/dnf_wrapper/microdnf /bin/dnf_wrapper/dnf
+RUN ln -s /bin/microdnf /bin/dnf_wrapper/dnf.real
 COPY prepare-efi.sh /bin/
+#RUN dnf config-manager --disable rhel-9-openstack-17-rpms || true
 RUN dnf config-manager --disable rhel-9-openstack-17-rpms || true
+RUN dnf repolist
 RUN prepare-efi.sh redhat
 
-FROM registry.ci.openshift.org/ocp/4.21:base-rhel9
+FROM registry.ci.openshift.org/ocp/4.21:base-rhel9-minimal-test
 
 ENV REMOTE_SOURCES=${REMOTE_SOURCES:-"requirements*.cachito"}
 ENV REMOTE_SOURCES_DIR=${REMOTE_SOURCES_DIR:-"/remote_sources_dir/"}
@@ -23,8 +28,8 @@ COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh scripts/*  /bin/
 # some cachito magic
 COPY "$REMOTE_SOURCES" "$REMOTE_SOURCES_DIR"
 
-RUN dnf config-manager --disable rhel-9-openstack-17-rpms  || true && \
-    prepare-image.sh && \
+#RUN dnf config-manager --disable rhel-9-openstack-17-rpms  || true && \
+RUN prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
     /bin/prepare-ipxe.sh && \
     rm -f /tmp/prepare-ipxe.sh
