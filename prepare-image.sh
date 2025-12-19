@@ -8,6 +8,7 @@ echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
 
 dnf upgrade -y
 
+dnf repolist
 xargs -rtd'\n' dnf install -y < /tmp/${PKGS_LIST}
 if [ $(uname -m) = "x86_64" ]; then
     dnf install -y syslinux-nonlinux;
