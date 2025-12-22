@@ -1,5 +1,5 @@
 # Please ensure this file is kept in sync with Dockerfile.scos
-FROM registry.ci.openshift.org/ocp/4.21:base-rhel9 AS builder
+FROM registry.ci.openshift.org/ocp/4.22:base-rhel9 AS builder
 
 WORKDIR /tmp
 
@@ -7,7 +7,7 @@ COPY prepare-efi.sh /bin/
 RUN dnf config-manager --disable rhel-9-openstack-17-rpms || true
 RUN prepare-efi.sh redhat
 
-FROM registry.ci.openshift.org/ocp/4.21:base-rhel9
+FROM registry.ci.openshift.org/ocp/4.22:base-rhel9
 
 ENV REMOTE_SOURCES=${REMOTE_SOURCES:-"requirements*.cachito"}
 ENV REMOTE_SOURCES_DIR=${REMOTE_SOURCES_DIR:-"/remote_sources_dir/"}
