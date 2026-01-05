@@ -1,13 +1,10 @@
 # Please ensure this file is kept in sync with Dockerfile.scos
-FROM registry.ci.openshift.org/ocp/4.21:base-rhel9-minimal-test AS builder
+FROM registry.ci.openshift.org/ocp/4.21:base-rhel9 AS builder
+
 WORKDIR /tmp
 
-
-RUN ln -s /bin/dnf_wrapper/microdnf /bin/dnf_wrapper/dnf
-RUN ln -s /bin/microdnf /bin/dnf_wrapper/dnf.real
 COPY prepare-efi.sh /bin/
 RUN dnf config-manager --disable rhel-9-openstack-17-rpms || true
-RUN dnf repolist
 RUN prepare-efi.sh redhat
 
 FROM registry.ci.openshift.org/ocp/4.21:base-rhel9-minimal-test
@@ -17,8 +14,8 @@ ENV REMOTE_SOURCES_DIR=${REMOTE_SOURCES_DIR:-"/remote_sources_dir/"}
 ENV PKGS_LIST=main-packages-list.ocp
 ARG EXTRA_PKGS_LIST
 
-RUN ln -s /bin/dnf_wrapper/microdnf /bin/dnf_wrapper/dnf
-RUN ln -s /bin/microdnf /bin/dnf_wrapper/dnf.real
+#RUN ln -s /bin/dnf_wrapper/microdnf /bin/dnf_wrapper/dnf
+#RUN ln -s /bin/microdnf /bin/dnf_wrapper/dnf.real
 COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} /tmp/
 COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
      ironic-config/ipxe_config.template ironic-config/dnsmasq.conf.j2 \
