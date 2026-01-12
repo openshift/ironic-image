@@ -18,7 +18,7 @@ python3-charset-normalizer >= 3.3.2-1.el9
 python3-cliff >= 4.9.1
 python3-construct
 python3-debtcollector >= 3.0.0-0.20250214185317.0e6ce1c.el9
-python3-eventlet >= 0.33.1-6.el9
+python3-eventlet >= 0.33.1-7.el9
 python3-flask >= 2:2.0.1-4.el9.2
 python3-futurist >= 3.1.0-0.20250320142818.bd83787.el9
 python3-inotify
