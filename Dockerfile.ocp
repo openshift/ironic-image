@@ -4,7 +4,6 @@ FROM registry.ci.openshift.org/ocp/4.22:base-rhel9 AS builder
 WORKDIR /tmp
 
 COPY prepare-efi.sh /bin/
-RUN dnf config-manager --disable rhel-9-openstack-17-rpms || true
 RUN prepare-efi.sh redhat
 
 FROM registry.ci.openshift.org/ocp/4.22:base-rhel9
@@ -23,8 +22,7 @@ COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh scripts/*  /bin/
 # some cachito magic
 COPY "$REMOTE_SOURCES" "$REMOTE_SOURCES_DIR"
 
-RUN rm -f /etc/yum.repos.d/rhel-9-openstack-17.repo || true && \
-    prepare-image.sh && \
+RUN prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
     /bin/prepare-ipxe.sh && \
     rm -f /tmp/prepare-ipxe.sh
