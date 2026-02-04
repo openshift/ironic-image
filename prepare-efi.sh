@@ -4,6 +4,9 @@ set -euxo pipefail
 
 OS=${1:-centos}
 
+# Install dnf-plugins-core first to enable --allowerasing and --forcearch support
+dnf install -y dnf dnf-plugins-core
+
 # NOTE(elfosardo): glibc-gconv-extra was included by default in the past and
 # we need it otherwise mkfs.msdos will fail with:
 # ``Cannot initialize conversion from codepage 850 to ANSI_X3.4-1968: Invalid argument``
