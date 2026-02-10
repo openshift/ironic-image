@@ -4,7 +4,11 @@ FROM registry.ci.openshift.org/ocp/4.22:base-rhel9 AS builder
 WORKDIR /tmp
 
 COPY prepare-efi.sh /bin/
-RUN prepare-efi.sh redhat
+
+RUN <<EORUN
+set -euxo pipefail
+prepare-efi.sh redhat
+EORUN
 
 FROM registry.ci.openshift.org/ocp/4.22:base-rhel9
 
@@ -22,10 +26,13 @@ COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh scripts/*  /bin/
 # some cachito magic
 COPY "$REMOTE_SOURCES" "$REMOTE_SOURCES_DIR"
 
-RUN prepare-image.sh && \
-    rm -f /bin/prepare-image.sh && \
-    /bin/prepare-ipxe.sh && \
-    rm -f /tmp/prepare-ipxe.sh
+RUN <<EORUN
+set -euxo pipefail
+prepare-image.sh
+rm -f /bin/prepare-image.sh
+/bin/prepare-ipxe.sh
+rm -f /tmp/prepare-ipxe.sh
+EORUN
 
 # IRONIC #
 COPY --from=builder /tmp/uefi_esp_*.img /tmp/
@@ -40,10 +47,16 @@ COPY ironic-config/apache2-vmedia.conf.j2 /templates/httpd-vmedia.conf.j2
 COPY ironic-config/apache2-proxy.conf.j2 /etc/httpd-proxy.conf.j2
 COPY ironic-config/apache2-ipxe.conf.j2 /templates/httpd-ipxe.conf.j2
 
-RUN mkdir -p /var/lib/ironic && \
-  sqlite3 /var/lib/ironic/ironic.sqlite "pragma journal_mode=wal" && \
-  dnf remove -y sqlite
+RUN <<EORUN
+set -euxo pipefail
+mkdir -p /var/lib/ironic
+sqlite3 /var/lib/ironic/ironic.sqlite "pragma journal_mode=wal"
+dnf remove -y sqlite
+EORUN
 
 # configure non-root user and set relevant permissions
-RUN configure-nonroot.sh && \
-  rm -f /bin/configure-nonroot.sh
+RUN <<EORUN
+set -euxo pipefail
+configure-nonroot.sh
+rm -f /bin/configure-nonroot.sh
+EORUN
