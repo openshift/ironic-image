@@ -10,10 +10,43 @@ set -euxo pipefail
 prepare-efi.sh redhat
 EORUN
 
-FROM registry.ci.openshift.org/ocp/4.22:base-rhel9
+## Build Python wheels from cachito sources
+FROM registry.ci.openshift.org/ocp/4.22:base-rhel9 AS wheel-builder
 
 ENV REMOTE_SOURCES=${REMOTE_SOURCES:-"requirements*.cachito"}
 ENV REMOTE_SOURCES_DIR=${REMOTE_SOURCES_DIR:-"/remote_sources_dir/"}
+
+# Install build dependencies
+RUN <<EORUN
+set -euxo pipefail
+echo "install_weak_deps=False" >> /etc/dnf/dnf.conf
+echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
+dnf install -y \
+    python3.12-pip \
+    'python3.12-setuptools >= 64.0.0' \
+    python3.12-setuptools_scm \
+    python3.12-pbr \
+    python3.12-devel \
+    python3.12-wheel \
+    gcc \
+    gcc-c++ \
+    git-core
+EORUN
+
+# Copy cachito sources
+COPY "$REMOTE_SOURCES" "$REMOTE_SOURCES_DIR"
+
+# Build wheels from cachito requirements
+COPY build-wheels-ocp.sh /bin/
+
+RUN <<EORUN
+set -euxo pipefail
+build-wheels-ocp.sh
+EORUN
+
+# build final image
+FROM registry.ci.openshift.org/ocp/4.22:base-rhel9
+
 ENV PKGS_LIST=main-packages-list.ocp
 ARG EXTRA_PKGS_LIST
 
@@ -23,10 +56,8 @@ COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
      /templates/
 COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh scripts/*  /bin/
 
-# some cachito magic
-COPY "$REMOTE_SOURCES" "$REMOTE_SOURCES_DIR"
-
-RUN <<EORUN
+# Install Python packages from pre-built wheels (mounted from wheel-builder stage)
+RUN --mount=from=wheel-builder,source=/wheels,target=/wheels <<EORUN
 set -euxo pipefail
 prepare-image.sh
 rm -f /bin/prepare-image.sh
