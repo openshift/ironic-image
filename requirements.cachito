@@ -1,5 +1,5 @@
-ironic @ git+https://github.com/openshift/openstack-ironic@38a2ef6d5e0c7b1cd7f25c93caa2ece32cafcee6
-sushy @ git+https://github.com/openshift/openstack-sushy@066861d39b79ce5e96edb28f311b38549dcfc6ee
+ironic @ git+https://github.com/jacob-anders/openstack-ironic@285e1d79b6d0cff366812863f38a7c712a20fea9
+sushy @ git+https://github.com/openshift/openstack-sushy@6c87ee66e9bdbfc5a32d967180ad775785fb8ed5
 
 proliantutils===2.16.3
 python-scciclient===0.17.0
