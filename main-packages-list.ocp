@@ -2,7 +2,6 @@ coreos-installer
 crudini >= 0.9.3-4.el9
 dnsmasq >= 2.85-3.el9
 dosfstools
-genisoimage
 httpd
 httpd-tools
 ipcalc
@@ -90,3 +89,4 @@ python3.12-zipp >= 3.19.1-1.el9
 qemu-img
 sqlite
 util-linux
+xorriso

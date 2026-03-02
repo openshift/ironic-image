@@ -1,7 +1,6 @@
 coreos-installer
 dnsmasq
 dosfstools
-genisoimage
 git-core
 httpd
 httpd-tools
@@ -15,3 +14,4 @@ mod_ssl
 qemu-img
 sqlite
 util-linux
+xorriso
