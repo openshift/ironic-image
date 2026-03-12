@@ -1,4 +1,9 @@
 # Please ensure this file is kept in sync with Dockerfile.ocp
+
+# Temporary hack to enable Post Quantum(PQ) platform support
+FROM registry.redhat.io/ubi9/ubi:latest as policy
+RUN update-crypto-policies --set DEFAULT:PQ
+
 FROM quay.io/centos/centos:stream9 AS builder
 
 WORKDIR /tmp
@@ -10,6 +15,9 @@ FROM quay.io/centos/centos:stream9
 
 ENV PKGS_LIST=main-packages-list.okd
 ARG EXTRA_PKGS_LIST
+
+# Temporary hack to enable Post Quantum(PQ) platform support
+COPY --from=policy /etc/crypto-policies /etc/crypto-policies
 
 COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} python-requirements.okd /tmp/
 COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
