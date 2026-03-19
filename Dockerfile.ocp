@@ -1,9 +1,15 @@
 # Please ensure this file is kept in sync with Dockerfile.scos
 FROM registry.ci.openshift.org/ocp/4.22:base-rhel9 AS builder
 
+ENV ART_DNF_WRAPPER_DEBUG="true"
+
 WORKDIR /tmp
 
 COPY prepare-efi.sh /bin/
+COPY dnf_wrapper.sh /bin/dnf_wrapper/dnf
+RUN cp /bin/dnf_wrapper/dnf /bin/dnf_wrapper/microdnf
+
+RUN ls -la /etc/yum.repos.art/ci/
 
 RUN set -euxo pipefail && \
     prepare-efi.sh redhat
@@ -11,8 +17,15 @@ RUN set -euxo pipefail && \
 ## Build Python wheels from cachito sources
 FROM registry.ci.openshift.org/ocp/4.22:base-rhel9 AS wheel-builder
 
+ENV ART_DNF_WRAPPER_DEBUG="true"
+
 ENV REMOTE_SOURCES=${REMOTE_SOURCES:-"requirements*.cachito"}
 ENV REMOTE_SOURCES_DIR=${REMOTE_SOURCES_DIR:-"/remote_sources_dir/"}
+
+COPY dnf_wrapper.sh /bin/dnf_wrapper/dnf
+RUN cp /bin/dnf_wrapper/dnf /bin/dnf_wrapper/microdnf
+
+RUN ls -la /etc/yum.repos.art/ci/
 
 # Install build dependencies
 RUN set -euxo pipefail && \
@@ -41,8 +54,15 @@ RUN set -euxo pipefail && \
 # build final image
 FROM registry.ci.openshift.org/ocp/4.22:base-rhel9
 
+ENV ART_DNF_WRAPPER_DEBUG="true"
+
 ENV PKGS_LIST=main-packages-list.ocp
 ARG EXTRA_PKGS_LIST
+
+COPY dnf_wrapper.sh /bin/dnf_wrapper/dnf
+RUN cp /bin/dnf_wrapper/dnf /bin/dnf_wrapper/microdnf
+
+RUN ls -la /etc/yum.repos.art/ci/
 
 COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} /tmp/
 COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
