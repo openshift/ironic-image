@@ -1,5 +1,5 @@
 ironic @ git+https://github.com/openshift/openstack-ironic@205cab3f891da48480377faf1f596c22e9bf82ea
-sushy @ git+https://github.com/openshift/openstack-sushy@14d9be9efe71534fbad150ee3d40f7c9919f387b
+sushy @ git+https://github.com/openshift/openstack-sushy@e085fc0e44e34f036620b724986ee41831111d5b
 
 proliantutils===2.16.3
 sushy-oem-idrac===6.0.0
