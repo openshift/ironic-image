@@ -67,8 +67,8 @@ python3.12-pbr >= 6.0.0-1.el9
 python3.12-pecan
 python3.12-pint >= 0.10.1-3.el9
 python3.12-psutil
-python3.12-pyasn1 >= 0.5.1-3.el9
-python3.12-pyasn1-modules >= 0.5.1-3.el9
+python3.12-pyasn1 >= 0.5.1-5.el9ocp
+python3.12-pyasn1-modules >= 0.5.1-5.el9ocp
 python3.12-pycdlib
 python3.12-pyghmi >= 1.5.14-2.1.el9ost
 python3.12-pysnmp-lextudio >= 5.0.33-1.el9
