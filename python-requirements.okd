@@ -3,6 +3,4 @@ git+https://github.com/openshift/openstack-ironic
 proliantutils
 pyghmi
 python-scciclient
-pyasyncore
-pyinotify
 watchdog
