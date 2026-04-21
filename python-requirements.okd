@@ -5,3 +5,4 @@ pyghmi
 python-scciclient
 pyasyncore
 pyinotify
+watchdog
