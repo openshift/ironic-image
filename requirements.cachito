@@ -1,3 +1,16 @@
+# Packages are pinned to commit hashes from the OpenShift forks on GitHub.
+# The format is: <package> @ git+<github_url>@<commit_sha>
+#
+# For testing with an upstream Gerrit change, you can temporarily
+# replace the URL and hash with the upstream repo and patchset commit SHA,
+# for example for ironic:
+#   ironic @ git+https://opendev.org/openstack/ironic@<patchset_commit_sha>
+#
+# Where <patchset_commit_sha> can be obtained from the gerrit UI.
+#
+# Note: this will fail CI checks (check-requirements.sh) and the downstream
+# Cachito build pipeline, so revert before submitting a PR.
+
 ironic @ git+https://github.com/openshift/openstack-ironic@f8686d33cf45e128c7d58e055c0c0ddf27e3d959
 sushy @ git+https://github.com/openshift/openstack-sushy@5a6b97ea02edae6f709a3ced09db7c88c57ae5ef
 
