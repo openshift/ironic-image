@@ -74,8 +74,8 @@ jobs:
       id: current-hashes
       run: |
         # Extract current hashes from requirements.cachito
-        CURRENT_IRONIC=$(grep "ironic @ git+" requirements.cachito | sed 's/.*@//' || echo "")
-        CURRENT_SUSHY=$(grep "sushy @ git+" requirements.cachito | sed 's/.*@//' || echo "")
+        CURRENT_IRONIC=$(grep "^ironic @ git+" requirements.cachito | sed 's/.*@//' || echo "")
+        CURRENT_SUSHY=$(grep "^sushy @ git+" requirements.cachito | sed 's/.*@//' || echo "")
 
         echo "current_ironic=$CURRENT_IRONIC" >> $GITHUB_OUTPUT
         echo "current_sushy=$CURRENT_SUSHY" >> $GITHUB_OUTPUT
