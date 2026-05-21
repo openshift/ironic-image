@@ -16,6 +16,7 @@ COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
      ironic-config/ipxe_config.template ironic-config/dnsmasq.conf.j2 \
      /templates/
 COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh setup.okd scripts/*  /bin/
+COPY patches /tmp/patches
 
 # Install Python 3.12 for SCOS builds
 RUN dnf install -y python3.12 python3.12-pip python3.12-devel python3.12-setuptools

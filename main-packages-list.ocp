@@ -11,6 +11,7 @@ ipxe-bootimgs-aarch64
 ipxe-bootimgs-x86
 ipxe-roms-qemu
 mod_ssl
+patch
 python3.12-automaton >= 3.2.0-0.20250214184705.9255778.el9
 python3.12-babel >= 2.9.1-2.el9
 python3.12-certifi >= 2020.12.5-2.1.el9

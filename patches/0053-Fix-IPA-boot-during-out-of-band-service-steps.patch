@@ -1,0 +1,118 @@
+From 5ac49f680dd16246f7bcab618f472eff48347cdd Mon Sep 17 00:00:00 2001
+From: Konstantinos Karampogias <karampok@gmail.com>
+Date: Tue, 31 Mar 2026 15:44:41 +0200
+Subject: [PATCH 53/54] Fix IPA boot during out-of-band service steps
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+When all service steps declare requires_ramdisk=False (e.g.
+bios.apply_configuration on Redfish), the servicing conductor
+correctly skips the initial IPA boot. However, the
+service_disable_ramdisk flag stored in driver_internal_info was
+being set from the disable_ramdisk *parameter* (False by default)
+before the per-step requires_ramdisk check ran. As a result, any
+step that internally calls reboot_to_finish_step() — as the Redfish
+BIOS interface does to apply settings that require a system reset —
+would read service_disable_ramdisk=False via is_ramdisk_disabled(),
+conclude that IPA should be booted, and issue a one-time boot to the
+virtual CDROM before rebooting the node.
+
+This caused an unnecessary and disruptive IPA boot cycle during every
+BIOS apply_configuration service operation even though the step is
+fully out-of-band and IPA plays no role in it.
+
+Assisted-By: Claude Sonnet 4.6
+Change-Id: I416a046a018f429a91f2958238d34a72854ae8f4
+Signed-off-by: Konstantinos Karampogias <karampok@gmail.com>
+(cherry picked from commit 9f2c21be17887b523d5abee05f8393b6b4a87064)
+---
+ ironic/conductor/servicing.py                  |  3 +++
+ ironic/tests/unit/conductor/test_servicing.py  | 18 +++++++++++++++++-
+ ...oot-oob-service-steps-b2e4f1a9c3d70845.yaml | 11 +++++++++++
+ 3 files changed, 31 insertions(+), 1 deletion(-)
+ create mode 100644 releasenotes/notes/fix-ipa-boot-oob-service-steps-b2e4f1a9c3d70845.yaml
+
+diff --git a/ironic/conductor/servicing.py b/ironic/conductor/servicing.py
+index b929ee4de..c8ecc13ba 100644
+--- a/ironic/conductor/servicing.py
++++ b/ironic/conductor/servicing.py
+@@ -106,6 +106,9 @@ def do_node_service(task, service_steps=None, disable_ramdisk=False):
+     else:
+         LOG.debug('Will proceed with servicing node %(node)s '
+                   'without booting the ramdisk.', {'node': node.uuid})
++        disable_ramdisk = True
++        node.set_driver_internal_info('service_disable_ramdisk', True)
++        node.save()
+ 
+     do_next_service_step(task, step_index, disable_ramdisk=disable_ramdisk)
+ 
+diff --git a/ironic/tests/unit/conductor/test_servicing.py b/ironic/tests/unit/conductor/test_servicing.py
+index 1ababbb1f..0b5b47f47 100644
+--- a/ironic/tests/unit/conductor/test_servicing.py
++++ b/ironic/tests/unit/conductor/test_servicing.py
+@@ -199,6 +199,11 @@ class DoNodeServiceTestCase(db_base.DbTestCase):
+         self.assertEqual(tgt_prov_state, node.target_provision_state)
+         mock_prep.assert_not_called()
+         mock_validate.assert_called_once_with(mock.ANY, mock.ANY)
++        self.assertTrue(
++            node.driver_internal_info.get('service_disable_ramdisk'),
++            'service_disable_ramdisk must be True when no step requires '
++            'the ramdisk, so that mid-step reboots do not boot IPA'
++        )
+ 
+     @mock.patch('ironic.drivers.modules.network.flat.FlatNetwork.validate',
+                 autospec=True)
+@@ -227,6 +232,11 @@ class DoNodeServiceTestCase(db_base.DbTestCase):
+         self.assertEqual(tgt_prov_state, node.target_provision_state)
+         mock_prep.assert_called_once_with(mock.ANY, mock.ANY)
+         mock_validate.assert_called_once_with(mock.ANY, mock.ANY)
++        self.assertFalse(
++            node.driver_internal_info.get('service_disable_ramdisk'),
++            'service_disable_ramdisk must not be True when a step requires '
++            'the ramdisk'
++        )
+ 
+     @mock.patch('ironic.drivers.modules.network.flat.FlatNetwork.validate',
+                 autospec=True)
+@@ -354,13 +364,19 @@ class DoNodeServiceTestCase(db_base.DbTestCase):
+             else:
+                 mock_network_valid.assert_called_once_with(mock.ANY, task)
+ 
++            effective_disable = disable_ramdisk or not any(
++                s.get('requires_ramdisk') for s in service_steps)
+             mock_next_step.assert_called_once_with(
+-                task, 0, disable_ramdisk=disable_ramdisk)
++                task, 0, disable_ramdisk=effective_disable)
+             mock_steps.assert_called_once_with(
+                 task, disable_ramdisk=disable_ramdisk)
+             if service_steps:
+                 self.assertEqual(service_steps,
+                                  node.driver_internal_info['service_steps'])
++            self.assertEqual(
++                effective_disable,
++                node.driver_internal_info.get('service_disable_ramdisk',
++                                              False))
+             self.assertFalse(node.maintenance)
+             self.assertNotIn('agent_secret_token', node.driver_internal_info)
+ 
+diff --git a/releasenotes/notes/fix-ipa-boot-oob-service-steps-b2e4f1a9c3d70845.yaml b/releasenotes/notes/fix-ipa-boot-oob-service-steps-b2e4f1a9c3d70845.yaml
+new file mode 100644
+index 000000000..f9d816e37
+--- /dev/null
++++ b/releasenotes/notes/fix-ipa-boot-oob-service-steps-b2e4f1a9c3d70845.yaml
+@@ -0,0 +1,11 @@
++---
++fixes:
++  - |
++    Fixed an unnecessary IPA boot during out-of-band service steps. When all
++    service steps declare ``requires_ramdisk=False``, the conductor correctly
++    skips the initial ramdisk boot, but ``service_disable_ramdisk`` in
++    ``driver_internal_info`` was left as ``False``. Steps that call
++    ``reboot_to_finish_step()`` internally (e.g. Redfish BIOS
++    ``apply_configuration``) would then boot IPA before the reboot, adding a
++    disruptive and unnecessary boot cycle. The flag is now set to ``True``
++    whenever all service steps are out-of-band.
+-- 
+2.54.0
+

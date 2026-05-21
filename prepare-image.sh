@@ -38,6 +38,12 @@ if [[ -f /tmp/main-packages-list.ocp ]]; then
         --prefix /usr \
         /wheels/*.whl
 
+    if [[ -d /tmp/patches ]]; then
+        for patch in $(ls /tmp/patches/*.patch); do
+            patch -f -p 1 -d /usr/lib/python3.12/site-packages < $patch
+        done
+    fi
+
     # NOTE(janders) since we set --no-compile at install time, we need to
     # compile post-install (see RHEL-29028)
     python3.12 -m compileall --invalidation-mode=timestamp -q -x '/usr/share/doc' /usr
