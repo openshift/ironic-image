@@ -116,6 +116,7 @@ jobs:
         cat requirements.cachito
 
     - name: Create Pull Request
+      id: create-pr
       if: steps.check-update.outputs.need_update == 'true'
       uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
       with:
@@ -168,4 +169,52 @@ jobs:
           echo "- Sushy: ${{ steps.get-commits.outputs.sushy_hash }}"
         else
           echo "No updates needed - all hashes are current"
+        fi
+
+    - name: Notify Slack
+      if: always()
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        JOB_STATUS: ${{ job.status }}
+        NEED_UPDATE: ${{ steps.check-update.outputs.need_update }}
+        CURRENT_IRONIC: ${{ steps.current-hashes.outputs.current_ironic }}
+        IRONIC_HASH: ${{ steps.get-commits.outputs.ironic_hash }}
+        CURRENT_SUSHY: ${{ steps.current-hashes.outputs.current_sushy }}
+        SUSHY_HASH: ${{ steps.get-commits.outputs.sushy_hash }}
+        PR_URL: ${{ steps.create-pr.outputs.pull-request-url }}
+      run: |
+        if [ -z "${SLACK_WEBHOOK_URL}" ]; then
+          echo "SLACK_WEBHOOK_URL is not set, skipping Slack notification"
+          exit 0
+        fi
+
+        if [ "${JOB_STATUS}" = "success" ]; then
+          if [ "${NEED_UPDATE}" = "true" ]; then
+            TEXT=$(printf '%s\n' \
+              ":white_check_mark: *${GITHUB_REPOSITORY} update-requirements*: opened PR for updated requirements.cachito" \
+              "• Ironic previous: \`${CURRENT_IRONIC}\`" \
+              "• Ironic new: \`${IRONIC_HASH}\`" \
+              "• Sushy previous: \`${CURRENT_SUSHY}\`" \
+              "• Sushy new: \`${SUSHY_HASH}\`")
+            if [ -n "${PR_URL}" ]; then
+              TEXT=$(printf '%s\n' "${TEXT}" "• PR: ${PR_URL}")
+            fi
+            TEXT=$(printf '%s\n' "${TEXT}" "• Run: ${RUN_URL}")
+          else
+            TEXT=$(printf '%s\n' \
+              ":information_source: *${GITHUB_REPOSITORY} update-requirements*: no update needed (hashes are current)" \
+              "• Run: ${RUN_URL}")
+          fi
+        else
+          TEXT=$(printf '%s\n' \
+            ":x: *${GITHUB_REPOSITORY} update-requirements*: workflow failed" \
+            "• Run: ${RUN_URL}")
+        fi
+
+        payload=$(jq -n --arg text "${TEXT}" '{text: $text}')
+        if ! curl -fsSL -X POST -H 'Content-type: application/json' \
+          --data "${payload}" "${SLACK_WEBHOOK_URL}"; then
+          echo "::warning::Failed to post Slack notification (workflow result unchanged)"
         fi
