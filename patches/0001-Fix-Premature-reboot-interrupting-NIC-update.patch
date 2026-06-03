@@ -1,0 +1,71 @@
+From 9f52550fc4b92236ddb1f08974c07239e1718afe Mon Sep 17 00:00:00 2001
+From: Iury Gregory Melo Ferreira <imelofer@redhat.com>
+Date: Fri, 20 Mar 2026 23:47:26 -0300
+Subject: [PATCH 01/54] Fix Premature reboot interrupting NIC update
+
+While testing nic firmware updates, we saw a machine rebooting
+2 seconds later after calling the SimpleUpdate for NIC firmware,
+this premature reboot interruped the initialization of the update.
+
+Closes-Bug: #2145063
+Change-Id: I2535fbaee2f4fade80501377db510f834783333e
+Signed-off-by: Iury Gregory Melo Ferreira <imelofer@redhat.com>
+---
+ ironic/drivers/modules/redfish/firmware.py                 | 7 ++++---
+ ironic/tests/unit/drivers/modules/redfish/test_firmware.py | 5 +++--
+ ...re-reboot-interrupting-nic-update-3a4d8d4dbe4a9593.yaml | 5 +++++
+ 3 files changed, 12 insertions(+), 5 deletions(-)
+ create mode 100644 releasenotes/notes/fix-premature-reboot-interrupting-nic-update-3a4d8d4dbe4a9593.yaml
+
+diff --git a/ironic/drivers/modules/redfish/firmware.py b/ironic/drivers/modules/redfish/firmware.py
+index eed8aa77d..85cebe61d 100644
+--- a/ironic/drivers/modules/redfish/firmware.py
++++ b/ironic/drivers/modules/redfish/firmware.py
+@@ -352,11 +352,12 @@ class RedfishFirmware(base.FirmwareInterface):
+                  'task state to determine if reboot is needed.',
+                  {'node': node.uuid})
+ 
+-        # NIC: Set async flags with reboot enabled
+-        # (reboot will be triggered conditionally if hardware needs it)
++        # NIC: Set async flags with reboot disabled
++        # The task monitoring logic (_handle_nic_task_starting) will decide
++        # whether to trigger a reboot after observing the task state.
+         deploy_utils.set_async_step_flags(
+             node,
+-            reboot=True,
++            reboot=False,
+             polling=True
+         )
+ 
+diff --git a/ironic/tests/unit/drivers/modules/redfish/test_firmware.py b/ironic/tests/unit/drivers/modules/redfish/test_firmware.py
+index f5f059ee1..8f677ad0b 100644
+--- a/ironic/tests/unit/drivers/modules/redfish/test_firmware.py
++++ b/ironic/tests/unit/drivers/modules/redfish/test_firmware.py
+@@ -2178,10 +2178,11 @@ class RedfishFirmwareTestCase(db_base.DbTestCase):
+                                       'interface': 'firmware'}
+             result = task.driver.firmware.update(task, settings)
+ 
+-            # Verify reboot=True for NIC updates (reboot is conditional)
++            # Verify reboot=False for NIC updates (task monitoring logic
++            # will decide whether to trigger a reboot)
+             mock_set_async_flags.assert_called_once_with(
+                 task.node,
+-                reboot=True,
++                reboot=False,
+                 polling=True
+             )
+             # Verify we return wait state to keep step active
+diff --git a/releasenotes/notes/fix-premature-reboot-interrupting-nic-update-3a4d8d4dbe4a9593.yaml b/releasenotes/notes/fix-premature-reboot-interrupting-nic-update-3a4d8d4dbe4a9593.yaml
+new file mode 100644
+index 000000000..99d5f7751
+--- /dev/null
++++ b/releasenotes/notes/fix-premature-reboot-interrupting-nic-update-3a4d8d4dbe4a9593.yaml
+@@ -0,0 +1,5 @@
++---
++fixes:
++  - |
++    Fixes an issue where immediate reboots can interrupt the
++    initialization of NIC firmware update.
+-- 
+2.54.0
+

@@ -49,6 +49,7 @@ COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
      ironic-config/ipxe_config.template ironic-config/dnsmasq.conf.j2 \
      /templates/
 COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh scripts/*  /bin/
+COPY patches /tmp/patches
 
 # Install Python packages from pre-built wheels (mounted from wheel-builder stage)
 RUN --mount=from=wheel-builder,source=/wheels,target=/wheels \
