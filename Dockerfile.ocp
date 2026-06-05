@@ -20,7 +20,7 @@ RUN set -euxo pipefail && \
     echo "tsflags=nodocs" >> /etc/dnf/dnf.conf && \
     dnf install -y \
         python3.12-pip \
-        'python3.12-setuptools >= 70.3.0' \
+        'python3.12-setuptools >= 78.1.1' \
         python3.12-setuptools_scm \
         python3.12-pbr \
         python3.12-devel \
