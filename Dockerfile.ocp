@@ -14,21 +14,13 @@ FROM registry.ci.openshift.org/ocp/5.0:base-rhel9 AS wheel-builder
 ENV REMOTE_SOURCES=${REMOTE_SOURCES:-"requirements*.cachito"}
 ENV REMOTE_SOURCES_DIR=${REMOTE_SOURCES_DIR:-"/remote_sources_dir/"}
 
+COPY build-packages-list.ocp /tmp/
+
 # Install build dependencies
 RUN set -euxo pipefail && \
     echo "install_weak_deps=False" >> /etc/dnf/dnf.conf && \
     echo "tsflags=nodocs" >> /etc/dnf/dnf.conf && \
-    dnf install -y \
-        python3.12-pip \
-        'python3.12-setuptools >= 78.1.1' \
-        'python3.12-packaging >= 24.2' \
-        python3.12-setuptools_scm \
-        python3.12-pbr \
-        python3.12-devel \
-        python3.12-wheel \
-        gcc \
-        gcc-c++ \
-        git-core
+    xargs -rtd'\n' dnf install -y < /tmp/build-packages-list.ocp
 
 # Copy cachito sources
 COPY "$REMOTE_SOURCES" "$REMOTE_SOURCES_DIR"
