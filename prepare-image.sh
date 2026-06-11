@@ -42,6 +42,8 @@ if [[ -f /tmp/main-packages-list.ocp ]]; then
     # compile post-install (see RHEL-29028)
     python3.12 -m compileall --invalidation-mode=timestamp -q -x '/usr/share/doc' /usr
 
+    dnf remove -y python3.12-pip
+
     # ironic system configuration
     mkdir -p /var/log/ironic /var/lib/ironic
     getent group ironic >/dev/null || groupadd -r -g "${IRONIC_GID}" ironic

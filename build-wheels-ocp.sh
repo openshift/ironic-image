@@ -18,7 +18,7 @@ fi
 # to use build tools already installed in the system, for our case
 # setuptools and pbr, instead of installing them in the isolated
 # pip environment.
-WHEEL_OPTIONS="--no-cache-dir --no-build-isolation"
+WHEEL_OPTIONS="--no-cache-dir --no-build-isolation --no-index"
 
 # NOTE(elfosardo): download all the libraries and dependencies first,
 # using --no-deps to avoid chain-downloading packages.
