@@ -13,7 +13,7 @@
 
 ironic @ git+https://github.com/openshift/openstack-ironic@0cf4ebd85b5eedb4db30989382e4772120f68641
 sushy @ git+https://github.com/openshift/openstack-sushy@134fc12a1c9e35d86df6178fc6f74db4717fdbe4
-networking-generic-switch @ git+https://github.com/openshift/openstack-networking-generic-switch@17e9cc58ab1c8478e9c6f5c9bb335aaa27d9d86e
+networking-generic-switch @ git+https://github.com/openshift/openstack-networking-generic-switch@fe3cd8ff8ed2d08757942b925a927a2619d63189
 
 proliantutils===2.16.3
 python-scciclient===0.17.0
