@@ -15,6 +15,8 @@ export IRONIC_ENABLE_VLAN_INTERFACES=${IRONIC_ENABLE_VLAN_INTERFACES:-all}
 # shellcheck disable=SC1091
 . /bin/ironic-common.sh
 # shellcheck disable=SC1091
+. /bin/ironic-networking-common.sh
+# shellcheck disable=SC1091
 . /bin/auth-common.sh
 
 if [[ "${IRONIC_USE_MARIADB}" == true ]]; then
@@ -25,10 +27,12 @@ if [[ "${IRONIC_USE_MARIADB}" == true ]]; then
     MARIADB_DATABASE=${MARIADB_DATABASE:-ironic}
     MARIADB_USER=${MARIADB_USER:-ironic}
     MARIADB_HOST=${MARIADB_HOST:-127.0.0.1}
+    set +x
     export MARIADB_CONNECTION="mysql+pymysql://${MARIADB_USER}:${MARIADB_PASSWORD}@${MARIADB_HOST}/${MARIADB_DATABASE}?charset=utf8"
     if [[ "$MARIADB_TLS_ENABLED" == "true" ]]; then
         export MARIADB_CONNECTION="${MARIADB_CONNECTION}&ssl=on&ssl_ca=${MARIADB_CACERT_FILE}"
     fi
+    set -x
 fi
 
 # zero makes it do cpu number detection on Ironic side
@@ -96,11 +100,23 @@ if [[ -f /proc/sys/crypto/fips_enabled ]]; then
     export ENABLE_FIPS_IPA
 fi
 
-# The original ironic.conf is empty, and can be found in ironic.conf_orig
+# inject TLS and cacert bundle variables in ipxe_template
+sed "1 a\
+\{%- set ipxe_tls_setup = $IPXE_TLS_SETUP %}\\
+\{%- set inject_cacert_bundle = $IRONIC_INJECT_IPA %}\\
+\{%- set ipxe_tls_port = $IPXE_TLS_PORT %}" /templates/ipxe_config.template > "${IRONIC_CONF_DIR}/ipxe_config.template"
+
+# The original ironic.conf is empty, and can be found in ironic.conf.orig
 render_j2_config "/etc/ironic/ironic.conf.j2" \
     "${IRONIC_CONF_DIR}/ironic.conf"
 
-configure_json_rpc_auth
+if [[ "${IRONIC_EXPOSE_JSON_RPC}" == "true" ]]; then
+    configure_json_rpc_auth
+fi
+
+if [[ "${IRONIC_NETWORKING_ENABLED}" == "true" ]]; then
+    configure_json_rpc_auth "ironic_networking_json_rpc"
+fi
 
 # Make sure ironic traffic bypasses any proxies
 export NO_PROXY="${NO_PROXY:-},$IRONIC_IP"

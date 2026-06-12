@@ -54,7 +54,7 @@ RUN --mount=from=wheel-builder,source=/wheels,target=/wheels \
 # IRONIC #
 COPY --from=builder /tmp/uefi_esp_*.img /templates/
 
-COPY ironic-config/ironic.conf.j2 /etc/ironic/
+COPY ironic-config/ironic.conf.j2 ironic-config/ironic-networking.conf.j2 /etc/ironic/
 
 # Custom httpd config, removes all but the bare minimum needed modules
 COPY ironic-config/httpd.conf.j2 /etc/httpd/conf/

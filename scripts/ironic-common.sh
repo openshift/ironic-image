@@ -36,7 +36,10 @@ mkdir -p "${IRONIC_CONF_DIR}" "${PROBE_CONF_DIR}" "${HTTPD_CONF_DIR}" \
 export HTPASSWD_FILE="${IRONIC_CONF_DIR}/htpasswd"
 export LOCAL_DB_URI="sqlite:///${IRONIC_DB_DIR}/ironic.sqlite"
 
-export IRONIC_USE_MARIADB=${IRONIC_USE_MARIADB:-false}
+export IRONIC_USE_MARIADB="${IRONIC_USE_MARIADB:-false}"
+
+# Allow override in ironic-networking use cases
+export IRONIC_FORCE_DHCP="${IRONIC_FORCE_DHCP:-false}"
 
 get_provisioning_interface()
 {
@@ -144,6 +147,12 @@ wait_for_interface_or_ip()
     export IRONIC_HTTP_URL="${IRONIC_HTTP_URL:-http://${IRONIC_URL_HOST}:${HTTP_PORT}}"
     export IRONIC_TFTP_URL="${IRONIC_TFTP_URL:-tftp://${IRONIC_URL_HOST}}"
     export IRONIC_BASE_URL=${IRONIC_BASE_URL:-"${IRONIC_SCHEME}://${IRONIC_URL_HOST}:${IRONIC_ACCESS_PORT}"}
+
+    if [[ "${IPXE_TLS_SETUP:-false}" == "true" ]]; then
+        export IRONIC_IPA_BASE_URL="${IRONIC_IPA_BASE_URL:-${IPXE_SCHEME}://${IRONIC_URL_HOST}:${IPXE_TLS_PORT}}"
+    else
+        export IRONIC_IPA_BASE_URL="${IRONIC_IPA_BASE_URL:-${IRONIC_HTTP_URL}}"
+    fi
 }
 
 render_j2_config()
