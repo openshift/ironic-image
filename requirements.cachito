@@ -11,7 +11,7 @@
 # Note: this will fail CI checks (check-requirements.sh) and the downstream
 # Cachito build pipeline, so revert before submitting a PR.
 
-ironic @ git+https://github.com/openshift/openstack-ironic@0cf4ebd85b5eedb4db30989382e4772120f68641
+ironic @ git+https://github.com/openshift/openstack-ironic@b3896c2cc3d4b3758f0fec9a1a66f6d72bfca43d
 sushy @ git+https://github.com/openshift/openstack-sushy@134fc12a1c9e35d86df6178fc6f74db4717fdbe4
 
 proliantutils===2.16.3
