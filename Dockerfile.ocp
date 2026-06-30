@@ -1,6 +1,8 @@
 # Please ensure this file is kept in sync with Dockerfile.okd
 FROM registry.ci.openshift.org/ocp/builder:rhel-9-base-openshift-4.15 AS builder
 
+### THIS IS A TEST
+
 WORKDIR /tmp
 
 COPY prepare-efi.sh /bin/
