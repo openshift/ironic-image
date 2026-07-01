@@ -19,6 +19,9 @@ The following entry points are provided:
    the provisioning of baremetal nodes.  Details on Ironic can be found at
    <https://docs.openstack.org/ironic/latest/>.  This is the default entry point
    used by the Dockerfile.
+- `runironic-networking` - Starts the ironic-networking service for standalone
+   network management of baremetal nodes. This service handles switch port
+   configuration for node provisioning, cleaning, and inspection operations.
 - `rundnsmasq` - Runs the dnmasq dhcp server to provide addresses and initiate
    PXE boot of baremetal nodes.  This includes a lightweight TFTP server.
    Details on dnsmasq can be found at
@@ -58,6 +61,11 @@ functionality:
 - `DHCP_HOSTS` - a `;` separated list of `dhcp-host` entries, e.g. known MAC
    addresses like `00:20:e0:3b:13:af;00:20:e0:3b:14:af` (empty by default). For
    more details on `dhcp-host` see
+   [the man page](https://thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html).
+- `DHCP_OPTIONS` - a `;` separated list of additional `dhcp-option` directives
+   that allows passing specific network configuration parameters (like routers,
+   DNS servers, and NTP) to DHCP clients (empty by default). Only applies to
+   IPv4 provisioning (`IPV=4` or unset). For more details on `dhcp-option` see
    [the man page](https://thekelleys.org.uk/dnsmasq/docs/dnsmasq-man.html).
 - `DHCP_IGNORE` - a set of tags on hosts that should be ignored and not allocate
    DHCP leases for, e.g. `tag:!known` to ignore any unknown hosts (empty by
@@ -168,6 +176,39 @@ media HTTP server configuration:
 - `IRONIC_VMEDIA_TLS_ENFORCE_SERVER_CIPHER_ORDER` - Setting this variable to
   `true` will make the server enforce its cipher list ordering for TLS version
   up to 1.2, defaults to `false`
+
+## Ironic Networking
+
+The ironic networking configuration can be overridden by various environment
+variables.  The following can serve as an example of those most common settings.
+
+- `IRONIC_NETWORKING_ENABLED` - Enable standalone networking service
+   (default `false`)
+- `IRONIC_NETWORKING_JSON_RPC_HOST` - JSON-RPC host for networking service
+   (default `localhost`)
+- `IRONIC_NETWORKING_JSON_RPC_PORT` - JSON-RPC port for networking service
+   (default `8090`)
+- `IRONIC_NETWORKING_ENABLED_SWITCH_DRIVERS` - Enabled switch drivers (default
+   `generic-switch`)
+- `IRONIC_NETWORKING_SWITCH_CONFIGS` - Path to switch configuration file.
+   Switch configurations and SSH keys should be stored in a Secret and mounted
+   to the Pod as a file and referenced by this variable.
+   (default `${IRONIC_CONF_DIR}/networking/switch-configs.conf`)
+- `IRONIC_NETWORKING_PROVISIONING_NETWORK` - Network details for the
+   provisioning network (e.g., mode=access/native_vlan=123)
+- `IRONIC_NETWORKING_INSPECTION_NETWORK` - Network details for the inspection
+   network (e.g., mode=access/native_vlan=123)
+- `IRONIC_NETWORKING_SERVICING_NETWORK` - Network details for the servicing
+   network (e.g., mode=access/native_vlan=123)
+- `IRONIC_NETWORKING_CLEANING_NETWORK` - Network details for the cleaning
+   network (e.g., mode=access/native_vlan=123)
+- `IRONIC_NETWORKING_RESCUING_NETWORK` - Network details for the rescuing
+   network (e.g., mode=access/native_vlan=123)
+- `IRONIC_NETWORKING_IDLE_NETWORK` - Network details for the idle
+   network (e.g., mode=access/native_vlan=123)
+
+**Note:**  The ironic-networking service requires the `networking-generic-switch`
+  package.
 
 ## Using a read-only root filesystem
 

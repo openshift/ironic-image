@@ -21,9 +21,11 @@ env:
   # Repositories to track
   IRONIC_REPO: "openshift/openstack-ironic"
   SUSHY_REPO: "openshift/openstack-sushy"
+  NGS_REPO: "openshift/openstack-networking-generic-switch"
   # Default branches to track
   IRONIC_BRANCH: "main"
   SUSHY_BRANCH: "main"
+  NGS_BRANCH: "main"
 
 jobs:
   update-requirements:
@@ -64,11 +66,18 @@ jobs:
           "https://api.github.com/repos/${{ env.SUSHY_REPO }}/commits/${{ env.SUSHY_BRANCH }}" | \
           jq -r '.sha')
 
+        # Get latest commit hash from networking-generic-switch repository
+        NGS_HASH=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ env.NGS_REPO }}/commits/${{ env.NGS_BRANCH }}" | \
+          jq -r '.sha')
+
         echo "ironic_hash=$IRONIC_HASH" >> $GITHUB_OUTPUT
         echo "sushy_hash=$SUSHY_HASH" >> $GITHUB_OUTPUT
+        echo "ngs_hash=$NGS_HASH" >> $GITHUB_OUTPUT
 
         echo "Latest Ironic commit: $IRONIC_HASH"
         echo "Latest Sushy commit: $SUSHY_HASH"
+        echo "Latest Networking Generic Switch commit: $NGS_HASH"
 
     - name: Check current hashes in requirements.cachito
       id: current-hashes
@@ -76,12 +85,15 @@ jobs:
         # Extract current hashes from requirements.cachito
         CURRENT_IRONIC=$(grep "^ironic @ git+" requirements.cachito | sed 's/.*@//' || echo "")
         CURRENT_SUSHY=$(grep "^sushy @ git+" requirements.cachito | sed 's/.*@//' || echo "")
+        CURRENT_NGS=$(grep "^networking-generic-switch @ git+" requirements.cachito | sed 's/.*@//' || echo "")
 
         echo "current_ironic=$CURRENT_IRONIC" >> $GITHUB_OUTPUT
         echo "current_sushy=$CURRENT_SUSHY" >> $GITHUB_OUTPUT
+        echo "current_ngs=$CURRENT_NGS" >> $GITHUB_OUTPUT
 
         echo "Current Ironic hash: $CURRENT_IRONIC"
         echo "Current Sushy hash: $CURRENT_SUSHY"
+        echo "Current Networking Generic Switch hash: $CURRENT_NGS"
 
     - name: Check if update is needed
       id: check-update
@@ -98,6 +110,11 @@ jobs:
           NEED_UPDATE=true
         fi
 
+        if [ "${{ steps.get-commits.outputs.ngs_hash }}" != "${{ steps.current-hashes.outputs.current_ngs }}" ]; then
+          echo "Networking Generic Switch hash changed"
+          NEED_UPDATE=true
+        fi
+
         if [ "${{ github.event.inputs.force_update }}" = "true" ]; then
           echo "Force update requested"
           NEED_UPDATE=true
@@ -111,6 +128,7 @@ jobs:
         # Update the file
         sed -i "s|ironic @ git+https://github.com/${{ env.IRONIC_REPO }}@.*|ironic @ git+https://github.com/${{ env.IRONIC_REPO }}@${{ steps.get-commits.outputs.ironic_hash }}|" requirements.cachito
         sed -i "s|sushy @ git+https://github.com/${{ env.SUSHY_REPO }}@.*|sushy @ git+https://github.com/${{ env.SUSHY_REPO }}@${{ steps.get-commits.outputs.sushy_hash }}|" requirements.cachito
+        sed -i "s|networking-generic-switch @ git+https://github.com/${{ env.NGS_REPO }}@.*|networking-generic-switch @ git+https://github.com/${{ env.NGS_REPO }}@${{ steps.get-commits.outputs.ngs_hash }}|" requirements.cachito
 
         echo "Updated requirements.cachito:"
         cat requirements.cachito
@@ -126,6 +144,7 @@ jobs:
 
           - Ironic: ${{ steps.get-commits.outputs.ironic_hash }}
           - Sushy: ${{ steps.get-commits.outputs.sushy_hash }}
+          - Networking Generic Switch: ${{ steps.get-commits.outputs.ngs_hash }}
         title: "NO-ISSUE: Update requirements.cachito with latest openshift forks commits"
         body: |
           ## Automated Requirements Update
@@ -141,7 +160,11 @@ jobs:
           #### Sushy ({0})
           - **Previous**: `{1}`
           - **New**: `{2}`
-          - **Compare**: https://github.com/{0}/compare/{1}..{2}', env.SUSHY_REPO, steps.current-hashes.outputs.current_sushy, steps.get-commits.outputs.sushy_hash) || '' }}
+          - **Compare**: https://github.com/{0}/compare/{1}..{2}', env.SUSHY_REPO, steps.current-hashes.outputs.current_sushy, steps.get-commits.outputs.sushy_hash) || '' }}${{ steps.get-commits.outputs.ngs_hash != steps.current-hashes.output.current_ngs && format('
+          #### Networking Generic Switch ({0})
+          - **Previous**: `{1}`
+          - **New**: `{2}`
+          - **Compare**: https://github.com/{0}/compare/{1}..{2}', env.NGS_REPO, steps.current-hashes.outputs.current_ngs, steps.get-commits.outputs.ngs_hash) || '' }}
 
           ### Verification
 
@@ -167,6 +190,7 @@ jobs:
           echo "Requirements updated and PR created"
           echo "- Ironic: ${{ steps.get-commits.outputs.ironic_hash }}"
           echo "- Sushy: ${{ steps.get-commits.outputs.sushy_hash }}"
+          echo "- Networking Generic Switch: ${{ steps.get-commits.outputs.ngs_hash }}"
         else
           echo "No updates needed - all hashes are current"
         fi
@@ -183,6 +207,8 @@ jobs:
         IRONIC_HASH: ${{ steps.get-commits.outputs.ironic_hash }}
         CURRENT_SUSHY: ${{ steps.current-hashes.outputs.current_sushy }}
         SUSHY_HASH: ${{ steps.get-commits.outputs.sushy_hash }}
+        CURRENT_NGS: ${{ steps.current-hashes.output.current_ngs }}
+        NGS_HASH: ${{ steps.get-commits.outputs.ngs_hash }}
         PR_URL: ${{ steps.create-pr.outputs.pull-request-url }}
       run: |
         if [ -z "${SLACK_WEBHOOK_URL}" ]; then
@@ -197,7 +223,9 @@ jobs:
               "• Ironic previous: \`${CURRENT_IRONIC}\`" \
               "• Ironic new: \`${IRONIC_HASH}\`" \
               "• Sushy previous: \`${CURRENT_SUSHY}\`" \
-              "• Sushy new: \`${SUSHY_HASH}\`")
+              "• Sushy new: \`${SUSHY_HASH}\`" \
+              "• Networking Generic Switch previous: \`${CURRENT_NGS}\`" \
+              "• Networking Generic Switch new: \`${NGS_HASH}\`")
             if [ -n "${PR_URL}" ]; then
               TEXT=$(printf '%s\n' "${TEXT}" "• PR: ${PR_URL}")
             fi
