@@ -11,8 +11,8 @@
 # Note: this will fail CI checks (check-requirements.sh) and the downstream
 # Cachito build pipeline, so revert before submitting a PR.
 
-ironic @ git+https://github.com/openshift/openstack-ironic@4d0b9f07e93f60092a2ca6989ef5014d5d5caed2
-sushy @ git+https://github.com/openshift/openstack-sushy@134fc12a1c9e35d86df6178fc6f74db4717fdbe4
+ironic @ git+https://github.com/openshift/openstack-ironic@15ec180e26eac104afea8f58fc9d429af9c403c9
+sushy @ git+https://github.com/openshift/openstack-sushy@13acced61644ab5a2ff88eff498cd599d16fde42
 
 proliantutils===2.16.3
 python-scciclient===0.17.0
