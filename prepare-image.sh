@@ -8,6 +8,10 @@ echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
 
 dnf upgrade -y
 
+# Enable PQC
+dnf install -y crypto-policies-scripts
+update-crypto-policies --set DEFAULT:PQ
+
 xargs -rtd'\n' dnf install -y < /tmp/${PKGS_LIST}
 if [ $(uname -m) = "x86_64" ]; then
     dnf install -y syslinux-nonlinux;
