@@ -11,9 +11,9 @@
 # Note: this will fail CI checks (check-requirements.sh) and the downstream
 # Cachito build pipeline, so revert before submitting a PR.
 
-ironic @ git+https://github.com/openshift/openstack-ironic@893fb5ff41fca109225d7589eb3358d612cda5cb
+ironic @ git+https://github.com/openshift/openstack-ironic@e8efd58fc4f6ec8f1e5b91b2c3b1a3daed9ec433
 sushy @ git+https://github.com/openshift/openstack-sushy@13acced61644ab5a2ff88eff498cd599d16fde42
-networking-generic-switch @ git+https://github.com/openshift/openstack-networking-generic-switch@fe3cd8ff8ed2d08757942b925a927a2619d63189
+networking-generic-switch @ git+https://github.com/openshift/openstack-networking-generic-switch@4a93e64000fd373c40b2f6fd4c4a4fc0b9206a61
 
 proliantutils===2.16.3
 python-scciclient===0.17.0
