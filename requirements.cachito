@@ -1,4 +1,4 @@
-ironic @ git+https://github.com/openshift/openstack-ironic@3517857c04c6e51977ec1442b4bdbc3df4f1c011
+ironic @ git+https://github.com/openshift/openstack-ironic@d2ce0d1aef2d040c846efd97fc8bddaffa6d3902
 sushy @ git+https://github.com/openshift/openstack-sushy@e5fdbebaa18a8e8f1f9bd9347079403dadb037c3
 
 proliantutils===2.16.3
