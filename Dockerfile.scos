@@ -18,17 +18,15 @@ COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
      /templates/
 COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh setup.okd scripts/*  /bin/
 
-# Install Python 3.12 for SCOS builds
-RUN dnf install -y python3.12 python3.12-pip python3.12-devel python3.12-setuptools
-
-RUN prepare-image.sh && \
+# Install Python 3.12 for SCOS builds, then packages.
+# Add PQC support - on Stream 9 apply the PQ subpolicy; skip if on Stream 10+ as PQ is already in DEFAULT
+RUN dnf install -y python3.12 python3.12-pip python3.12-devel python3.12-setuptools && \
+    prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
     rm -f /bin/setup.okd && \
     /bin/prepare-ipxe.sh && \
-    rm -f /bin/prepare-ipxe.sh
-
-# Add PQC support - on Stream 9 apply the PQ subpolicy; Skip if on Stream 10+ as PQ is already in DEFAULT
-RUN if [ -f /usr/share/crypto-policies/policies/modules/PQ.pmod ]; then \
+    rm -f /bin/prepare-ipxe.sh && \
+    if [ -f /usr/share/crypto-policies/policies/modules/PQ.pmod ]; then \
       update-crypto-policies --set DEFAULT:PQ; \
     fi
 
@@ -47,10 +45,6 @@ COPY ironic-config/httpd-modules.conf /etc/httpd/conf.modules.d/
 COPY ironic-config/apache2-vmedia.conf.j2 /templates/httpd-vmedia.conf.j2
 COPY ironic-config/apache2-proxy.conf.j2 /etc/httpd-proxy.conf.j2
 COPY ironic-config/apache2-ipxe.conf.j2 /templates/httpd-ipxe.conf.j2
-
-RUN mkdir -p /var/lib/ironic && \
-  sqlite3 /var/lib/ironic/ironic.sqlite "pragma journal_mode=wal" && \
-  dnf remove -y sqlite
 
 # configure non-root user and set relevant permissions
 RUN configure-nonroot.sh && \

@@ -68,6 +68,11 @@ rm -f /usr/share/ironic/ironic-dist.conf
 # add ironic to apache group
 usermod -aG ironic apache
 
+# sqlite is in the package list only to initialize the DB; drop it afterwards
+mkdir -p /var/lib/ironic
+sqlite3 /var/lib/ironic/ironic.sqlite "pragma journal_mode=wal"
+dnf remove -y sqlite
+
 dnf clean all
 rm -rf /var/cache/{yum,dnf}/*
 
