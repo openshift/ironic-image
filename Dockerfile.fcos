@@ -14,12 +14,11 @@ ARG EXTRA_PKGS_LIST
 COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} /tmp/
 COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh setup.okd scripts/* /bin/
 
-# Configure OpenStack repos
+# Configure OpenStack repos and install packages
 RUN sed -E -i 's/( =.*| >=.*)//g' /tmp/${PKGS_LIST} && \
     curl -o /etc/yum.repos.d/delorean.repo https://trunk.rdoproject.org/centos9-master/puppet-passed-ci/delorean.repo && \
-    curl -o /etc/yum.repos.d/delorean-deps.repo https://trunk.rdoproject.org/centos9-master/delorean-deps.repo
-
-RUN prepare-image.sh && \
+    curl -o /etc/yum.repos.d/delorean-deps.repo https://trunk.rdoproject.org/centos9-master/delorean-deps.repo && \
+    prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
     rm -f /bin/setup.okd && \
     /bin/prepare-ipxe.sh && \
@@ -40,10 +39,6 @@ COPY ironic-config/httpd-modules.conf /etc/httpd/conf.modules.d/
 COPY ironic-config/apache2-vmedia.conf.j2 /etc/httpd-vmedia.conf.j2
 COPY ironic-config/apache2-proxy.conf.j2 /etc/httpd-proxy.conf.j2
 COPY ironic-config/apache2-ipxe.conf.j2 /etc/httpd-ipxe.conf.j2
-
-RUN mkdir -p /var/lib/ironic && \
-  sqlite3 /var/lib/ironic/ironic.sqlite "pragma journal_mode=wal" && \
-  dnf remove -y sqlite
 
 # configure non-root user and set relevant permissions
 RUN configure-nonroot.sh && \

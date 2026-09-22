@@ -20,7 +20,9 @@ COPY build-packages-list.ocp /tmp/
 RUN set -euxo pipefail && \
     echo "install_weak_deps=False" >> /etc/dnf/dnf.conf && \
     echo "tsflags=nodocs" >> /etc/dnf/dnf.conf && \
-    grep -vE '^(#|$)' /tmp/build-packages-list.ocp | xargs -rtd'\n' dnf install -y
+    grep -vE '^(#|$)' /tmp/build-packages-list.ocp | xargs -rtd'\n' dnf install -y && \
+    dnf clean all && \
+    rm -rf /var/cache/{yum,dnf}/*
 
 # Copy cachito sources
 COPY "$REMOTE_SOURCES" "$REMOTE_SOURCES_DIR"
@@ -45,15 +47,14 @@ COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
 COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh scripts/*  /bin/
 
 # Install Python packages from pre-built wheels (mounted from wheel-builder stage)
+# Add PQC support until we have pqc enabled ubi minimal images available
 RUN --mount=from=wheel-builder,source=/wheels,target=/wheels \
     set -euxo pipefail && \
     prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
     /bin/prepare-ipxe.sh && \
-    rm -f /bin/prepare-ipxe.sh
-
-# Add PQC support until we have pqc enabled ubi minimal images available
-RUN update-crypto-policies --set DEFAULT:PQ
+    rm -f /bin/prepare-ipxe.sh && \
+    update-crypto-policies --set DEFAULT:PQ
 
 # IRONIC #
 COPY --from=builder /tmp/uefi_esp_*.img /templates/
@@ -67,13 +68,6 @@ COPY ironic-config/httpd-modules.conf /etc/httpd/conf.modules.d/
 COPY ironic-config/apache2-vmedia.conf.j2 /templates/httpd-vmedia.conf.j2
 COPY ironic-config/apache2-proxy.conf.j2 /etc/httpd-proxy.conf.j2
 COPY ironic-config/apache2-ipxe.conf.j2 /templates/httpd-ipxe.conf.j2
-
-RUN set -euxo pipefail && \
-    mkdir -p /var/lib/ironic && \
-    sqlite3 /var/lib/ironic/ironic.sqlite "pragma journal_mode=wal" && \
-    dnf remove -y sqlite && \
-    dnf clean all && \
-    rm -rf /var/cache/{yum,dnf}/*
 
 # configure non-root user and set relevant permissions
 RUN set -euxo pipefail && \
