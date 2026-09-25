@@ -11,10 +11,10 @@
 # Note: this will fail CI checks (check-requirements.sh) and the downstream
 # Cachito build pipeline, so revert before submitting a PR.
 
-ironic @ git+https://github.com/openshift/openstack-ironic@676288d27657403292b0db9d7820108d9405bf6d
-ironic-prometheus-exporter @ git+https://github.com/openshift/openstack-ironic-prometheus-exporter@f1968ea1b39ce2f975b862c1e86747b8b9bfd5a5
-sushy @ git+https://github.com/openshift/openstack-sushy@a783bf7a3d139feefba2f51b6f548e72638ca87b
-networking-generic-switch @ git+https://github.com/openshift/openstack-networking-generic-switch@9ef5f49d155716f86e798ad097f14cbf1b49f010
+ironic @ git+https://github.com/openshift/openstack-ironic@ff4fb694ad7710a6d934e273576ddb4cf719cd5f
+ironic-prometheus-exporter @ git+https://github.com/openshift/openstack-ironic-prometheus-exporter@68d3c8634566b0c306a5ebdab30eaf9a6b312922
+sushy @ git+https://github.com/openshift/openstack-sushy@c0ebf90cdaa5d0d23e6e01e823b2c396d2287220
+networking-generic-switch @ git+https://github.com/openshift/openstack-networking-generic-switch@458aac5116826e4792957a2b020f7bc5eae40e75
 
 # HARDWARE DRIVERS DEPENDENCIES
 proliantutils===2.16.3
