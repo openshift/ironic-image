@@ -11,7 +11,7 @@
 # Note: this will fail CI checks (check-requirements.sh) and the downstream
 # Cachito build pipeline, so revert before submitting a PR.
 
-ironic @ git+https://github.com/openshift/openstack-ironic@ae765a0ee577dc668be4f6fc913f8d31b40205ec
+ironic @ git+https://github.com/openshift/openstack-ironic@dad1956bc6b12c6c922eb7c6774093965692c8c5
 ironic-prometheus-exporter @ git+https://github.com/openshift/openstack-ironic-prometheus-exporter@87e6f36f732ddd4d72f13739e03901626546b187
 sushy @ git+https://github.com/openshift/openstack-sushy@07d55e48122f821f2854a6c9931671d30ec0d035
 networking-generic-switch @ git+https://github.com/openshift/openstack-networking-generic-switch@747b474d376c3dcdddaae029b055f959e05915c9
