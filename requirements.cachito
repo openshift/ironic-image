@@ -89,4 +89,4 @@ scp===0.15.0
 python-ironicclient===5.14.0
 python-keystoneclient===5.7.0
 tzdata===2025.2
-urllib3===2.3.0
+urllib3===2.8.0
