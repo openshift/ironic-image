@@ -30,9 +30,6 @@ COPY "$REMOTE_SOURCES" "$REMOTE_SOURCES_DIR"
 # Build wheels from cachito requirements
 COPY build-wheels-ocp.sh /bin/
 
-# Upgrade hatchling to support PEP 639 license-files format (required by urllib3 >= 2.4.0)
-RUN python3.12 -m pip install --no-cache-dir "hatchling>=1.27.0,<2"
-
 RUN set -euxo pipefail && \
     build-wheels-ocp.sh
 
