@@ -85,6 +85,7 @@ jwcrypto===1.5.8
 ncclient===0.6.15
 ntc-templates===6.1.0
 osc-lib===3.2.0
+oslo.i18n===6.5.1
 scp===0.15.0
 python-ironicclient===5.14.0
 python-keystoneclient===5.7.0
