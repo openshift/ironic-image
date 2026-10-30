@@ -11,9 +11,9 @@
 # Note: this will fail CI checks (check-requirements.sh) and the downstream
 # Cachito build pipeline, so revert before submitting a PR.
 
-ironic @ git+https://github.com/openshift/openstack-ironic@954d89d84048c3d49d35e24057808614e79435fb
+ironic @ git+https://github.com/openshift/openstack-ironic@fc0ddc99c6fabba12471bd5411d885d4c8f63882
 ironic-prometheus-exporter @ git+https://github.com/openshift/openstack-ironic-prometheus-exporter@893b5f47d95239dedeec97e6b0532a2328e65c8b
-sushy @ git+https://github.com/openshift/openstack-sushy@11f7a7d6738825c4223b8c195c1974d93f4e3bc1
+sushy @ git+https://github.com/openshift/openstack-sushy@085312fb3003001517ed81587bfaba74e6f51d82
 networking-generic-switch @ git+https://github.com/openshift/openstack-networking-generic-switch@f6f0bc145e779971f6217c6b1cf3a9c39161897d
 
 # HARDWARE DRIVERS DEPENDENCIES
