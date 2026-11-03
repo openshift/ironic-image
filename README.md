@@ -86,11 +86,15 @@ functionality:
    [dynamic-login](https://opendev.org/openstack/diskimage-builder/src/branch/master/diskimage_builder/elements/dynamic-login)
    element to inject the key.
 - `IRONIC_KERNEL_PARAMS` - This parameter can be used to add additional kernel
-   parameters to nodes running IPA
+  parameters to nodes running IPA
+- `IRONIC_HTTPD_LOGLEVEL` - Log level for the Ironic API's Apache server
+  (default `debug`)
 - `GATEWAY_IP` - gateway IP address to use for ironic dnsmasq(dhcpd)
 - `DNS_IP` - DNS IP address to use for ironic dnsmasq(dhcpd)
 - `IRONIC_IPA_COLLECTORS` - Use a custom set of collectors to be run on
-   inspection. (default `default,logs`)
+   inspection. (default `default,logs,pci-devices`)
+- `IRONIC_JSON_RPC_PORT` - port used by the Ironic JSON-RPC service (default
+  `6189`)
 - `HTTPD_ENABLE_SENDFILE` - Whether to activate the EnableSendfile apache
    directive for httpd `(default, false)`
 - `IRONIC_CONDUCTOR_HOST` - Host name of the current conductor (only makes
@@ -108,6 +112,44 @@ functionality:
 - `DEPLOY_KERNEL_URL` and `DEPLOY_RAMDISK_URL` provide the default IPA kernel
   and initramfs images. If they're not set, the images from IPA downloader are
   used (if present).
+
+The `DNSMASQ_DATA_DIR` build argument (default `/data/dnsmasq`) is used by
+`configure-nonroot.sh` to create and set permissions on dnsmasq's runtime
+directory. At runtime, that directory is derived from `CUSTOM_DATA_DIR`
+(default `/data`) as `${CUSTOM_DATA_DIR}/dnsmasq`.
+
+### Multi-architecture IPA support
+
+The image can serve architecture-specific IPA kernel and ramdisk images for
+`x86_64` and `aarch64` nodes:
+
+- `DEPLOY_KERNEL_BY_ARCH` and `DEPLOY_RAMDISK_BY_ARCH` accept comma-separated
+  `architecture:URL` entries. For example:
+
+  ```bash
+  DEPLOY_KERNEL_BY_ARCH=x86_64:file:///shared/html/images/ipa_x86.kernel,aarch64:file:///shared/html/images/ipa_arm64.kernel
+  DEPLOY_RAMDISK_BY_ARCH=x86_64:file:///shared/html/images/ipa_x86.initramfs,aarch64:file:///shared/html/images/ipa_arm64.initramfs
+  ```
+
+For automatic detection, set both `DEPLOY_KERNEL_URL_<ARCH>` and
+`DEPLOY_RAMDISK_URL_<ARCH>` for an architecture, or place both files named
+`ironic-python-agent_<arch>.kernel` and
+`ironic-python-agent_<arch>.initramfs` under `/shared/html/images`. Generic IPA
+images are used when no architecture-specific mapping is detected and for
+architectures without an explicit iPXE branch. Provide a complete kernel and
+ramdisk pair for each architecture you intend to boot.
+
+### IPA boot parameters
+
+- `IRONIC_IPA_INSECURE` - Allow insecure connections (default `1`)
+- `IRONIC_IPA_DEBUG` - Enable IPA debug mode (default `1`)
+- `IRONIC_IPA_INSPECTION_DHCP_ALL_INTERFACES` - Request DHCP on all interfaces
+  during inspection (default `1`)
+- `IRONIC_IPA_COLLECT_LLDP` - Collect LLDP information (default `1`)
+- `IPA_FORWARD_CONSOLE` - Forward console logs (default `yes`)
+- `INSPECTOR_EXTRA_ARGS` - Additional inspection kernel parameters
+- `WEBSERVER_CACERT_FILE` - CA certificate or bundle used to verify disk and
+  IPA images; it is also injected into IPA when configured.
 
 The following mountpoints can be passed in to customize run-time
 functionality:
@@ -137,16 +179,23 @@ MariaDB configuration:
 - `IRONIC_DBSYNC_INTERVAL` - interval in seconds between `ironic-dbsync`
   retries (default `1`)
 
-The ironic configuration can be overridden by various environment variables.
-The following can serve as an example:
+### Overriding Ironic configuration options
 
+Any Ironic configuration option can be overridden at runtime with an
+environment variable of the form `OS_<section>__<option>` (note the two
+underscores after the section). These variables take precedence over values
+rendered from templates. For example:
+
+- `OS_DEFAULT__DEBUG=true` - enable debug logging
+- `OS_SENSOR_DATA__SEND_SENSOR_DATA=false` - override the template's
+  `SEND_SENSOR_DATA` value
 - `OS_CONDUCTOR__DEPLOY_CALLBACK_TIMEOUT=4800` - timeout (seconds) to wait for
-   a callback from a deploy ramdisk
+  a callback from a deploy ramdisk
 - `OS_CONDUCTOR__INSPECT_TIMEOUT=1800` - timeout (seconds) for waiting for node
-   inspection
+  inspection
 - `OS_CONDUCTOR__CLEAN_CALLBACK_TIMEOUT=1800` - timeout (seconds) to wait for a
-   callback from the ramdisk doing the cleaning
-- `OS_PXE__BOOT_RETRY_TIMEOUT=1200` - timeout (seconds) to enable boot retries.
+  callback from the ramdisk doing the cleaning
+- `OS_PXE__BOOT_RETRY_TIMEOUT=1200` - timeout (seconds) to enable boot retries
 
 ## TLS configuration
 
@@ -170,6 +219,14 @@ TLS configuration:
 - `IRONIC_TLS_ENFORCE_SERVER_CIPHER_ORDER` - Setting this variable to
   `true` will make the server enforce its cipher list ordering for TLS version
   up to 1.2, defaults to `false`
+
+The following environment variables can be passed to customize the Ironic
+Prometheus Exporter TLS configuration:
+
+- `IRONIC_PROMETHEUS_EXPORTER_CERT_FILE` - TLS certificate for the exporter
+  (default `/certs/ironic-prometheus-exporter/tls.crt`)
+- `IRONIC_PROMETHEUS_EXPORTER_KEY_FILE` - TLS private key for the exporter
+  (default `/certs/ironic-prometheus-exporter/tls.key`)
 
 The following environment variables can be passed to customize the virtual
 media HTTP server configuration:

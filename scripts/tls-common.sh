@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euxo pipefail
+
 export IRONIC_INSECURE=${IRONIC_INSECURE:-false}
 export IRONIC_SSL_PROTOCOL=${IRONIC_SSL_PROTOCOL:-"-ALL +TLSv1.2 +TLSv1.3"}
 export IPXE_SSL_PROTOCOL=${IPXE_SSL_PROTOCOL:-"-ALL +TLSv1.2 +TLSv1.3"}
@@ -15,6 +17,8 @@ export IRONIC_VMEDIA_KEY_FILE=/certs/vmedia/tls.key
 export IPXE_CERT_FILE=/certs/ipxe/tls.crt
 export IPXE_KEY_FILE=/certs/ipxe/tls.key
 
+export IRONIC_PROMETHEUS_EXPORTER_CERT_FILE=${IRONIC_PROMETHEUS_EXPORTER_CERT_FILE:-/certs/ironic-prometheus-exporter/tls.crt}
+export IRONIC_PROMETHEUS_EXPORTER_KEY_FILE=${IRONIC_PROMETHEUS_EXPORTER_KEY_FILE:-/certs/ironic-prometheus-exporter/tls.key}
 export RESTART_CONTAINER_CERTIFICATE_UPDATED=${RESTART_CONTAINER_CERTIFICATE_UPDATED:-"false"}
 
 # By default every cert has to be signed with Ironic's
@@ -51,6 +55,15 @@ if [[ -f "$IPXE_CERT_FILE" ]] && [[ ! -f "$IPXE_KEY_FILE" ]]; then
 fi
 if [[ ! -f "$IPXE_CERT_FILE" ]] && [[ -f "$IPXE_KEY_FILE" ]]; then
     echo "Missing TLS Certificate file $IPXE_CERT_FILE"
+    exit 1
+fi
+
+if [[ -f "$IRONIC_PROMETHEUS_EXPORTER_CERT_FILE" ]] && [[ ! -f "$IRONIC_PROMETHEUS_EXPORTER_KEY_FILE" ]]; then
+    echo "Missing TLS Certificate key file $IRONIC_PROMETHEUS_EXPORTER_KEY_FILE"
+    exit 1
+fi
+if [[ ! -f "$IRONIC_PROMETHEUS_EXPORTER_CERT_FILE" ]] && [[ -f "$IRONIC_PROMETHEUS_EXPORTER_KEY_FILE" ]]; then
+    echo "Missing TLS Certificate file $IRONIC_PROMETHEUS_EXPORTER_CERT_FILE"
     exit 1
 fi
 
@@ -95,6 +108,12 @@ else
     export IPXE_TLS_SETUP="false"
 fi
 
+if [[ -f "$IRONIC_PROMETHEUS_EXPORTER_CERT_FILE" ]]; then
+    export IRONIC_PROMETHEUS_EXPORTER_TLS_SETUP="true"
+else
+    export IRONIC_PROMETHEUS_EXPORTER_TLS_SETUP="false"
+fi
+
 if [[ -f "$MARIADB_CACERT_FILE" ]]; then
     export MARIADB_TLS_ENABLED="true"
 else
@@ -125,7 +144,12 @@ configure_restart_on_certificate_update()
 
 if ls "${BMC_CACERTS_PATH}"/* > /dev/null 2>&1; then
     export BMC_TLS_ENABLED="true"
-    cat "${BMC_CACERTS_PATH}"/* > "${BMC_CACERT_FILE}"
+    bmc_tmp=$(mktemp "${BMC_CACERT_FILE}.XXXXXX")
+    if ! { cat "${BMC_CACERTS_PATH}"/* > "${bmc_tmp}" && chmod 0644 "${bmc_tmp}" && mv "${bmc_tmp}" "${BMC_CACERT_FILE}"; }; then
+        rm -f "${bmc_tmp}"
+        echo "Failed to assemble BMC CA bundle from ${BMC_CACERTS_PATH}" >&2
+        exit 1
+    fi
 else
     export BMC_TLS_ENABLED="false"
 fi
@@ -133,7 +157,7 @@ fi
 if [[ -f "${WEBSERVER_CACERT_FILE:-}" ]]; then
     export IRONIC_INJECT_IPA="true"
     copy_atomic "${WEBSERVER_CACERT_FILE}" "${IPA_CACERT_FILE}"
-    
+
     if [[ -f "${IRONIC_CACERT_FILE}" ]]; then
         cat "${IRONIC_CACERT_FILE}" >> "${IPA_CACERT_FILE}"
     fi
