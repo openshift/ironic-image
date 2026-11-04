@@ -4,7 +4,7 @@ set -euxo pipefail
 
 CHECK_RELEASE=${CHECK_RELEASE:-"main"}
 
-for repo in "openstack-ironic" "openstack-sushy" "openstack-networking-generic-switch"
+for repo in "openstack-ironic" "openstack-ironic-prometheus-exporter" "openstack-sushy" "openstack-networking-generic-switch"
 do
   line=$(grep "$repo@" requirements.cachito)
   echo $line
