@@ -8,6 +8,10 @@ git-core
 # Python headers for building C extensions
 python3.12-devel
 
+# PyNaCl's source wheel builds its bundled libsodium and CFFI extension
+make
+python3.12-cffi
+
 # build backends required by various packages in requirements.cachito
 python3.12-flit-core
 python3.12-hatch-fancy-pypi-readme

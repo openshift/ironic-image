@@ -28,6 +28,7 @@ cheroot===11.0.0
 construct===2.10.70
 cotyledon===2.2.0
 futurist===3.2.1
+gunicorn===26.2.0
 Jinja2===3.1.6
 jsonpatch===1.33
 jsonschema===4.19.2
@@ -86,6 +87,7 @@ ncclient===0.6.15
 ntc-templates===6.1.0
 osc-lib===3.2.0
 oslo.i18n===6.5.1
+PyNaCl===1.6.0
 scp===0.15.0
 python-ironicclient===5.14.0
 python-keystoneclient===5.7.0
