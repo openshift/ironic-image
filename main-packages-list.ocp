@@ -54,12 +54,10 @@ python3.12-platformdirs >= 3
 python3.12-prettytable >= 0.7.2
 python3.12-pyasn1 >= 0.5.1-5.el9ocp
 python3.12-pyasn1-modules >= 0.5.1-5.el9ocp
-python3.12-pyghmi >= 1.5.14-2.1.el9ost
 python3.12-pyjwt >= 2.4.0-1.el9ocp
 python3.12-pynacl >= 1.5
 python3.12-pyOpenSSL >= 19.1.0
 python3.12-pyparsing >= 2.1.0
-python3.12-pyserial >= 3.3
 python3.12-pyroute2 >= 0.7.3
 python3.12-pysnmp-lextudio >= 5.0.33-1.el9
 python3.12-redis
