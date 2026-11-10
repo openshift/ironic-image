@@ -6,6 +6,9 @@
 
 set -euxo pipefail
 
+. /bin/python-config.sh
+configure_python
+
 REQS="${REMOTE_SOURCES_DIR}/requirements.cachito"
 
 # load cachito variables only if they're available
@@ -28,15 +31,15 @@ WHEEL_OPTIONS="--no-cache-dir --no-build-isolation --no-index"
 # See https://issues.redhat.com/browse/METAL-1049 for more details.
 PIP_SOURCES_DIR="/tmp/all_sources"
 mkdir -p $PIP_SOURCES_DIR
-python3.12 -m pip download --no-binary=:all: --no-build-isolation --no-deps -r "${REQS}" -d $PIP_SOURCES_DIR
+"${PYTHON_BIN}" -m pip download --no-binary=:all: --no-build-isolation --no-deps -r "${REQS}" -d "${PIP_SOURCES_DIR}"
 
 # Build wheels from downloaded sources
 mkdir -p /wheels
-python3.12 -m pip wheel \
+"${PYTHON_BIN}" -m pip wheel \
     $WHEEL_OPTIONS \
     --wheel-dir=/wheels \
     --no-deps \
-    --find-links=$PIP_SOURCES_DIR \
+    --find-links="${PIP_SOURCES_DIR}" \
     -r "${REQS}"
 
 rm -rf $PIP_SOURCES_DIR
