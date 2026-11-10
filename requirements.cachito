@@ -16,10 +16,6 @@ ironic-prometheus-exporter @ git+https://github.com/openshift/openstack-ironic-p
 sushy @ git+https://github.com/openshift/openstack-sushy@ede5775f0b99fe938ab0b6fa8c165760294bcf03
 networking-generic-switch @ git+https://github.com/openshift/openstack-networking-generic-switch@3d1511f1bf312b09cba044aa07277a4da8b08039
 
-# HARDWARE DRIVERS DEPENDENCIES
-proliantutils===2.16.3
-python-scciclient===0.17.0
-
 # DIRECT DEPENDENCIES
 alembic===1.14.0
 automaton===3.3.0
@@ -88,15 +84,7 @@ ntc-templates===6.1.0
 osc-lib===3.2.0
 oslo.i18n===6.5.1
 PyNaCl===1.6.0
-# proliantutils===2.16.3 still requires PySNMP LeXtudio after Ironic removed
-# its own SNMP/iRMC drivers. Pin its transitive wheel dependencies explicitly.
-pyasn1===0.5.1
-pyasn1-modules===0.3.0
-pyasyncore===1.0.5
-ply===3.11
-pysmi-lextudio===1.4.3
-pysnmp-lextudio===5.0.33
-pysnmpcrypto===0.0.4
+pyserial===3.5
 scp===0.15.0
 python-ironicclient===5.14.0
 python-keystoneclient===5.7.0
