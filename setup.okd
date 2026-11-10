@@ -1,27 +1,30 @@
 #!/usr/bin/bash
 
 # OKD/SCOS Python 3.12 setup script
-# Install Python 3.12 versions of OpenStack packages via pip for OKD/SCOS builds
+# Install the selected Python version of OpenStack packages via pip.
 
 set -euo pipefail
+
+. /bin/python-config.sh
+configure_python
 
 # This script assumes it's called only for OKD/SCOS builds
 
 IRONIC_UID=1002
 IRONIC_GID=1003
 
-echo "Installing Python 3.12 packages for OKD/SCOS build"
+echo "Installing Python ${PYTHON_VERSION} packages for OKD/SCOS build"
 
-# Install Python 3.12 versions of OpenStack packages from requirements file
+# Install OpenStack packages from the requirements file.
 if [[ -f /tmp/python-requirements.okd ]]; then
-    echo "Installing OpenStack packages for Python 3.12 via pip"
-    python3.12 -m pip install --no-cache-dir --prefix /usr -c https://releases.openstack.org/constraints/upper/master -r /tmp/python-requirements.okd
+    echo "Installing OpenStack packages for Python ${PYTHON_VERSION} via pip"
+    "${PYTHON_BIN}" -m pip install --no-cache-dir --prefix /usr -c https://releases.openstack.org/constraints/upper/master -r /tmp/python-requirements.okd
     
     #Removing git as it is no longer required after installing ironic package
     dnf remove -y git-core
 
     # Compile Python files for better performance
-    python3.12 -m compileall --invalidation-mode=timestamp -q /usr
+    "${PYTHON_BIN}" -m compileall --invalidation-mode=timestamp -q /usr
 fi
 
 # Setup ironic system configuration for OKD/SCOS

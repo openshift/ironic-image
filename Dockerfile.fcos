@@ -8,11 +8,12 @@ RUN prepare-efi.sh fedora
 
 FROM quay.io/centos/centos:stream9
 
+ENV RHEL_MAJOR=9
 ENV PKGS_LIST=main-packages-list.okd
 ARG EXTRA_PKGS_LIST
 
 COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} /tmp/
-COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh setup.okd scripts/* /bin/
+COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh setup.okd python-config.sh scripts/* /bin/
 
 # Configure OpenStack repos and install packages
 RUN sed -E -i 's/( =.*| >=.*)//g' /tmp/${PKGS_LIST} && \
