@@ -48,6 +48,9 @@ COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
      /templates/
 COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh python-config.sh scripts/*  /bin/
 
+# Downstream patches applied to the installed Python packages, see patches/README.md
+COPY patches/ /patches/
+
 # Install Python packages from pre-built wheels (mounted from wheel-builder stage)
 # Add PQC support until we have pqc enabled ubi minimal images available
 RUN --mount=from=wheel-builder,source=/wheels,target=/wheels \
