@@ -16,10 +16,6 @@ ironic-prometheus-exporter @ git+https://github.com/openshift/openstack-ironic-p
 sushy @ git+https://github.com/openshift/openstack-sushy@07d55e48122f821f2854a6c9931671d30ec0d035
 networking-generic-switch @ git+https://github.com/openshift/openstack-networking-generic-switch@747b474d376c3dcdddaae029b055f959e05915c9
 
-# HARDWARE DRIVERS DEPENDENCIES
-proliantutils===2.16.3
-python-scciclient===0.17.0
-
 # DIRECT DEPENDENCIES
 alembic===1.14.0
 automaton===3.3.0
@@ -85,6 +81,7 @@ jwcrypto===1.5.8
 ncclient===0.6.15
 ntc-templates===6.1.0
 osc-lib===3.2.0
+pyserial===3.5
 scp===0.15.0
 python-ironicclient===5.14.0
 python-keystoneclient===5.7.0

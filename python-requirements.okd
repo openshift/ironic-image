@@ -1,6 +1,3 @@
 crudini
 git+https://github.com/openshift/openstack-ironic
-proliantutils
-pyghmi
-python-scciclient
 watchdog
