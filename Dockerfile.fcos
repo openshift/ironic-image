@@ -8,7 +8,6 @@ RUN prepare-efi.sh fedora
 
 FROM quay.io/centos/centos:stream9
 
-ENV RHEL_MAJOR=9
 ENV PKGS_LIST=main-packages-list.okd
 ARG EXTRA_PKGS_LIST
 
