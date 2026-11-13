@@ -11,10 +11,10 @@
 # Note: this will fail CI checks (check-requirements.sh) and the downstream
 # Cachito build pipeline, so revert before submitting a PR.
 
-ironic @ git+https://github.com/openshift/openstack-ironic@fddbc686e39086f8d45c625d448fe538f576628d
+ironic @ git+https://github.com/openshift/openstack-ironic@bbeacd5fde57a2b5e2b4a9685ba8114936a36d57
 ironic-prometheus-exporter @ git+https://github.com/openshift/openstack-ironic-prometheus-exporter@b13452c56e888f4414557844c28dd8faa1facd5a
-sushy @ git+https://github.com/openshift/openstack-sushy@ede5775f0b99fe938ab0b6fa8c165760294bcf03
-networking-generic-switch @ git+https://github.com/openshift/openstack-networking-generic-switch@3d1511f1bf312b09cba044aa07277a4da8b08039
+sushy @ git+https://github.com/openshift/openstack-sushy@0e075d772948a05765c02caf15d8283e48878df7
+networking-generic-switch @ git+https://github.com/openshift/openstack-networking-generic-switch@8ca6ed61e0a4a7bfd6cd339262a4aefb46ebc4e2
 
 # DIRECT DEPENDENCIES
 alembic===1.14.0
