@@ -28,7 +28,7 @@ if [[ -f /tmp/main-packages-list.ocp ]]; then
     IRONIC_UID=1002
     IRONIC_GID=1003
 
-    dnf install -y "${PYTHON_PACKAGE_PREFIX}-pip"
+    dnf install -y "${PYTHON_PACKAGE_PREFIX}-pip" patch
 
     # NOTE(janders): adding --no-compile option to avoid issues in FIPS
     # enabled environments. See https://issues.redhat.com/browse/RHEL-29028
@@ -41,11 +41,26 @@ if [[ -f /tmp/main-packages-list.ocp ]]; then
         --prefix /usr \
         /wheels/*.whl
 
+    # Apply the downstream patches in patches/ to the just-installed packages.
+    # This happens before compileall below so the .pyc files are built from the
+    # patched sources. -p2 strips the "a/src/" prefix of the upstream requests
+    # layout, leaving paths relative to site-packages. See patches/README.md.
+    #
+    # NOTE: the site-packages directory is located via the installed package
+    # itself, not via sysconfig: on RHEL sysconfig defaults to the posix_local
+    # scheme and reports /usr/local/lib/..., while the pip install above uses
+    # --prefix /usr and lands in /usr/lib/....
+    SITE_PACKAGES="$("${PYTHON_BIN}" -c 'import importlib.util, pathlib; print(pathlib.Path(importlib.util.find_spec("requests").origin).parents[1])')"
+    # -i takes an absolute path because patch(1) chdirs to -d before reading it
+    patch -p2 -d "${SITE_PACKAGES}" --no-backup-if-mismatch \
+        -i /patches/requests-ipv6-cidr-no_proxy.patch
+    rm -rf /patches
+
     # NOTE(janders) since we set --no-compile at install time, we need to
     # compile post-install (see RHEL-29028)
     "${PYTHON_BIN}" -m compileall --invalidation-mode=timestamp -q -x '/usr/share/doc' /usr
 
-    dnf remove -y "${PYTHON_PACKAGE_PREFIX}-pip"
+    dnf remove -y "${PYTHON_PACKAGE_PREFIX}-pip" patch
 
     # ironic system configuration
     mkdir -p /var/log/ironic /var/lib/ironic
