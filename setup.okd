@@ -18,6 +18,7 @@ echo "Installing Python ${PYTHON_VERSION} packages for OKD/SCOS build"
 # Install OpenStack packages from the requirements file.
 if [[ -f /tmp/python-requirements.okd ]]; then
     echo "Installing OpenStack packages for Python ${PYTHON_VERSION} via pip"
+    "${PYTHON_BIN}" -m pip install --no-cache-dir 'setuptools >= 70.3'
     "${PYTHON_BIN}" -m pip install --no-cache-dir --prefix /usr -c https://releases.openstack.org/constraints/upper/master -r /tmp/python-requirements.okd
     
     #Removing git as it is no longer required after installing ironic package
