@@ -8,7 +8,6 @@ RUN prepare-efi.sh centos
 
 FROM quay.io/centos/centos:stream9
 
-ENV RHEL_MAJOR=9
 ENV PKGS_LIST=main-packages-list.okd
 ARG EXTRA_PKGS_LIST
 ARG DNSMASQ_DATA_DIR=/data/dnsmasq
@@ -23,7 +22,7 @@ COPY prepare-image.sh prepare-ipxe.sh configure-nonroot.sh setup.okd python-conf
 # Add PQC support - on Stream 9 apply the PQ subpolicy; skip if on Stream 10+ as PQ is already in DEFAULT
 RUN . /bin/python-config.sh && configure_python && \
     dnf install -y "${PYTHON_PACKAGE_PREFIX}" "${PYTHON_PACKAGE_PREFIX}-pip" \
-        "${PYTHON_PACKAGE_PREFIX}-devel" "${PYTHON_PACKAGE_PREFIX}-setuptools" && \
+        "${PYTHON_PACKAGE_PREFIX}-devel" && \
     prepare-image.sh && \
     rm -f /bin/prepare-image.sh && \
     rm -f /bin/setup.okd && \
