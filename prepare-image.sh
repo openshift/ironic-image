@@ -11,14 +11,19 @@ echo "tsflags=nodocs" >> /etc/dnf/dnf.conf
 
 dnf upgrade -y
 
-grep -v '^#' "/tmp/${PKGS_LIST}" | xargs -rtd'\n' dnf install -y
+package_list="/tmp/${PKGS_LIST}"
+rendered_package_list="${package_list}.rendered"
+render_package_list "${package_list}" "${rendered_package_list}"
+grep -vE '^(#|$)' "${rendered_package_list}" | xargs -rtd'\n' dnf install -y
 if [ $(uname -m) = "x86_64" ]; then
     dnf install -y syslinux-nonlinux;
 fi
 
 if [[ -n "${EXTRA_PKGS_LIST:-}" ]]; then
     if [[ -s "/tmp/${EXTRA_PKGS_LIST}" ]]; then
-        grep -v '^#' "/tmp/${EXTRA_PKGS_LIST}" | xargs -rtd'\n' dnf install -y
+        rendered_extra_pkgs_list="/tmp/${EXTRA_PKGS_LIST}.rendered"
+        render_package_list "/tmp/${EXTRA_PKGS_LIST}" "${rendered_extra_pkgs_list}"
+        grep -vE '^(#|$)' "${rendered_extra_pkgs_list}" | xargs -rtd'\n' dnf install -y
     fi
 fi
 
