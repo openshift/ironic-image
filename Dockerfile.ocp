@@ -11,6 +11,15 @@ FROM registry.ci.openshift.org/ocp/builder:rhel-9-base-openshift-4.13
 ENV PKGS_LIST=main-packages-list.ocp
 ARG EXTRA_PKGS_LIST
 
+# CVE-2026-114605: disable eventlet's greendns (dnspython) resolver for every
+# ironic process in this image. dnspython (a transitive Requires of eventlet)
+# follows DNS compression pointers with no hop limit in dns.name.from_wire_parser,
+# allowing a DoS. Setting EVENTLET_NO_GREENDNS=yes makes eventlet fall back to the
+# system resolver so the vulnerable greendns path is never imported or used. The
+# ironic conductor already sets this in its own source; this covers the remaining
+# eventlet consumer in this image, ironic-inspector, which does not.
+ENV EVENTLET_NO_GREENDNS=yes
+
 COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} /tmp/
 COPY prepare-image.sh prepare-ipxe.sh /bin/
 
