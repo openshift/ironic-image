@@ -14,6 +14,13 @@ ENV REMOTE_SOURCES_DIR=${REMOTE_SOURCES_DIR:-"/remote_sources_dir/"}
 ENV PKGS_LIST=main-packages-list.ocp
 ARG EXTRA_PKGS_LIST
 
+# CVE-2026-114605: disable eventlet's greendns (dnspython) resolver for every
+# ironic process in this image. dnspython (a transitive Requires of eventlet)
+# follows DNS compression pointers with no hop limit in dns.name.from_wire_parser,
+# allowing a DoS. Setting EVENTLET_NO_GREENDNS=yes makes eventlet fall back to the
+# system resolver so the vulnerable greendns path is never imported or used.
+ENV EVENTLET_NO_GREENDNS=yes
+
 COPY ${PKGS_LIST} ${EXTRA_PKGS_LIST:-$PKGS_LIST} /tmp/
 COPY ironic-config/inspector.ipxe.j2 ironic-config/httpd-ironic-api.conf.j2 \
      ironic-config/ipxe_config.template ironic-config/dnsmasq.conf.j2 \
