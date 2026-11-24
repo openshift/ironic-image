@@ -23,6 +23,13 @@ fi
 # pip environment.
 WHEEL_OPTIONS="--no-cache-dir --no-build-isolation --no-index"
 
+# ssh-python's SYSTEM_LIBSSH mode expects libssh under /usr/local, while the
+# RHEL packages install it under /usr and /usr/lib64. Use the RHEL 9
+# backported CVE-2026-59847 fix rather than ssh-python's bundled libssh 0.11.3.
+mkdir -p /usr/local/include /usr/local/lib
+ln -sfnT /usr/include/libssh /usr/local/include/libssh
+ln -sfnT /usr/lib64/libssh.so /usr/local/lib/libssh.so
+
 # NOTE(elfosardo): download all the libraries and dependencies first,
 # using --no-deps to avoid chain-downloading packages.
 # This forces to download only the packages specified in the requirements file.
@@ -31,11 +38,16 @@ WHEEL_OPTIONS="--no-cache-dir --no-build-isolation --no-index"
 # See https://issues.redhat.com/browse/METAL-1049 for more details.
 PIP_SOURCES_DIR="/tmp/all_sources"
 mkdir -p $PIP_SOURCES_DIR
-"${PYTHON_BIN}" -m pip download --no-binary=:all: --no-build-isolation --no-deps -r "${REQS}" -d "${PIP_SOURCES_DIR}"
+SYSTEM_LIBSSH=1 "${PYTHON_BIN}" -m pip download \
+    --no-binary=:all: \
+    --no-build-isolation \
+    --no-deps \
+    -r "${REQS}" \
+    -d "${PIP_SOURCES_DIR}"
 
 # Build wheels from downloaded sources
 mkdir -p /wheels
-"${PYTHON_BIN}" -m pip wheel \
+SYSTEM_LIBSSH=1 "${PYTHON_BIN}" -m pip wheel \
     $WHEEL_OPTIONS \
     --wheel-dir=/wheels \
     --no-deps \

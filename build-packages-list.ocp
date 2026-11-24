@@ -3,6 +3,9 @@
 gcc
 gcc-c++
 
+# Use RHEL's CVE-2026-59847-backported libssh instead of ssh-python's bundle.
+libssh-devel >= 0.10.4-19.el9_8
+
 # needed by pip to fetch packages from git URLs
 git-core
 

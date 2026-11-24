@@ -3,6 +3,8 @@ coreos-installer
 crudini >= 0.9.3
 dnsmasq >= 2.85
 dosfstools
+# Runtime libssh for ssh-python; RHEL 9 backports the CVE-2026-59847 fix.
+libssh >= 0.10.4-19.el9_8
 httpd
 httpd-tools
 ipcalc
