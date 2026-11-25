@@ -254,6 +254,8 @@ send_sensor_data = {{ env.SEND_SENSOR_DATA }}
 # Power state is checked every 60 seconds and BMC activity should
 # be avoided more often than once every sixty seconds.
 interval = 160
+# NOTE(iurygregory): async sensor data collection is our default
+enable_async_collection = true
 
 [metrics]
 backend = collector

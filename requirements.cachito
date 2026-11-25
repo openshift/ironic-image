@@ -25,6 +25,7 @@ construct===2.10.70
 cotyledon===2.2.0
 futurist===3.2.1
 gunicorn===26.2.0
+httpx===0.28.1
 Jinja2===3.1.6
 jsonpatch===1.33
 jsonschema===4.19.2
