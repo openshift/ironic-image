@@ -1,5 +1,7 @@
 # Please ensure this file is kept in sync with Dockerfile.scos
-FROM registry.ci.openshift.org/ocp/5.0:base-rhel9 AS builder
+ARG BASE_IMAGE=registry.ci.openshift.org/ocp/5.0:base-rhel9
+
+FROM $BASE_IMAGE AS builder
 
 WORKDIR /tmp
 
@@ -9,7 +11,7 @@ RUN set -euxo pipefail && \
     prepare-efi.sh redhat
 
 ## Build Python wheels from cachito sources
-FROM registry.ci.openshift.org/ocp/5.0:base-rhel9 AS wheel-builder
+FROM $BASE_IMAGE AS wheel-builder
 
 ENV REMOTE_SOURCES=${REMOTE_SOURCES:-"requirements*.cachito"}
 ENV REMOTE_SOURCES_DIR=${REMOTE_SOURCES_DIR:-"/remote_sources_dir/"}
@@ -38,7 +40,7 @@ RUN set -euxo pipefail && \
     build-wheels-ocp.sh
 
 # build final image
-FROM registry.ci.openshift.org/ocp/5.0:base-rhel9
+FROM $BASE_IMAGE
 
 ENV PKGS_LIST=main-packages-list.ocp
 ARG EXTRA_PKGS_LIST
